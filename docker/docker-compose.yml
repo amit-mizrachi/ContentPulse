@@ -61,56 +61,6 @@ services:
     image: contentpulse-base:latest
 
   # Application Services
-  redis-service:
-    build:
-      context: ..
-      dockerfile: src/services/redis/Dockerfile
-    ports:
-      - "${PORT_REDIS_SERVICE:-8001}:${PORT_REDIS_SERVICE:-8001}"
-    environment:
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_REGION: ${AWS_REGION:-ap-south-1}
-      APPCONFIG_APPLICATION_ID: ${APPCONFIG_APPLICATION_ID}
-      APPCONFIG_ENVIRONMENT_ID: ${APPCONFIG_ENVIRONMENT_ID}
-      APPCONFIG_PROFILE_ID: ${APPCONFIG_PROFILE_ID}
-      SERVICE_PORT: ${PORT_REDIS_SERVICE:-8001}
-    depends_on:
-      base-image:
-        condition: service_completed_successfully
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${PORT_REDIS_SERVICE:-8001}${HEALTH_CHECK_PATH:-/health}"]
-      interval: ${HEALTH_CHECK_INTERVAL:-10}s
-      timeout: ${HEALTH_CHECK_TIMEOUT:-5}s
-      retries: ${HEALTH_CHECK_RETRIES:-5}
-
-  mongodb-service:
-    build:
-      context: ..
-      dockerfile: src/services/mongodb/Dockerfile
-    ports:
-      - "${PORT_MONGODB_SERVICE:-8002}:${PORT_MONGODB_SERVICE:-8002}"
-    environment:
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_REGION: ${AWS_REGION:-ap-south-1}
-      APPCONFIG_APPLICATION_ID: ${APPCONFIG_APPLICATION_ID}
-      APPCONFIG_ENVIRONMENT_ID: ${APPCONFIG_ENVIRONMENT_ID}
-      APPCONFIG_PROFILE_ID: ${APPCONFIG_PROFILE_ID}
-      SERVICE_PORT: ${PORT_MONGODB_SERVICE:-8002}
-    depends_on:
-      base-image:
-        condition: service_completed_successfully
-      mongodb:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${PORT_MONGODB_SERVICE:-8002}${HEALTH_CHECK_PATH:-/health}"]
-      interval: ${HEALTH_CHECK_INTERVAL:-10}s
-      timeout: ${HEALTH_CHECK_TIMEOUT:-5}s
-      retries: ${HEALTH_CHECK_RETRIES:-5}
-
   gateway-service:
     build:
       context: ..
@@ -128,7 +78,7 @@ services:
     depends_on:
       base-image:
         condition: service_completed_successfully
-      redis-service:
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${PORT_GATEWAY:-8000}${HEALTH_CHECK_PATH:-/health}"]
@@ -153,9 +103,9 @@ services:
     depends_on:
       base-image:
         condition: service_completed_successfully
-      redis-service:
+      redis:
         condition: service_healthy
-      mongodb-service:
+      mongodb:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${PORT_CONTENT_PROCESSOR:-8003}${HEALTH_CHECK_PATH:-/health}"]
@@ -180,9 +130,9 @@ services:
     depends_on:
       base-image:
         condition: service_completed_successfully
-      redis-service:
+      redis:
         condition: service_healthy
-      mongodb-service:
+      mongodb:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${PORT_QUERY_ENGINE:-8004}${HEALTH_CHECK_PATH:-/health}"]
@@ -209,7 +159,7 @@ services:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
-      mongodb-service:
+      mongodb:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${PORT_CONTENT_POLLER:-8005}${HEALTH_CHECK_PATH:-/health}"]

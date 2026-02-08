@@ -1,60 +1,62 @@
-"""Redis-backed state repository client."""
+"""Redis-backed state repository using direct Redis connection."""
+import json
+from datetime import datetime
 from functools import lru_cache
 from typing import Any, Dict, Optional
 
-import httpx
+import redis
 
 from src.interfaces.state_repository import StateRepository
-from src.utils.services.aws.appconfig_service import get_config_service
 from src.objects.requests.processed_request import ProcessedQuery
+from src.utils.services.aws.appconfig_service import get_config_service
 
 
 class RedisClient(StateRepository):
-    """Redis-backed state repository communicating via HTTP."""
+    """Direct Redis-backed state repository."""
+
+    _KEY_PREFIX = "query:"
 
     def __init__(self):
-        appconfig = get_config_service()
-        redis_service_host = appconfig.get("services.redis.host", "redis-service")
-        redis_service_port = appconfig.get("services.redis.port", 8001)
-        self._base_url = f"http://{redis_service_host}:{redis_service_port}"
-        self._client = httpx.Client(timeout=30.0)
+        config = get_config_service()
+        host = config.get("redis.host")
+        port = config.get("redis.port")
+        self._default_ttl = config.get("redis.default_ttl_seconds")
+        self._client = redis.Redis(host=host, port=port, decode_responses=True)
 
     def create(self, request_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
-        response = self._client.post(
-            f"{self._base_url}/requests/{request_id}",
-            json=data
-        )
-        response.raise_for_status()
-        return response.json()
+        key = self._make_key(request_id)
+        self._client.setex(key, self._default_ttl, json.dumps(data))
+        return data
 
     def get(self, request_id: str) -> Optional[Dict[str, Any]]:
-        response = self._client.get(f"{self._base_url}/requests/{request_id}")
-        if response.status_code == 404:
+        key = self._make_key(request_id)
+        raw = self._client.get(key)
+        if not raw:
             return None
-        response.raise_for_status()
-        return response.json()
+        return json.loads(raw)
 
     def update(self, request_id: str, updates: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        response = self._client.patch(
-            f"{self._base_url}/requests/{request_id}",
-            json=updates
-        )
-        if response.status_code == 404:
+        current_data = self.get(request_id)
+        if not current_data:
             return None
-        response.raise_for_status()
-        return response.json()
+
+        current_data.update(updates)
+        current_data["updated_at"] = datetime.utcnow().isoformat()
+
+        key = self._make_key(request_id)
+        ttl = self._client.ttl(key)
+        actual_ttl = ttl if ttl > 0 else self._default_ttl
+        self._client.setex(key, actual_ttl, json.dumps(current_data))
+
+        return current_data
 
     def delete(self, request_id: str) -> bool:
-        response = self._client.delete(f"{self._base_url}/requests/{request_id}")
-        if response.status_code == 404:
-            return False
-        response.raise_for_status()
-        return True
+        key = self._make_key(request_id)
+        return self._client.delete(key) > 0
 
     def is_healthy(self) -> bool:
         try:
-            response = self._client.get(f"{self._base_url}/health")
-            return response.status_code == 200
+            return self._client.ping()
         except Exception:
             return False
 
@@ -79,6 +81,9 @@ class RedisClient(StateRepository):
 
     def health_check(self) -> bool:
         return self.is_healthy()
+
+    def _make_key(self, request_id: str) -> str:
+        return f"{self._KEY_PREFIX}{request_id}"
 
 
 @lru_cache(maxsize=1)

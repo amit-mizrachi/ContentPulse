@@ -1,8 +1,8 @@
-"""HTTP client for MongoDB service."""
+"""MongoDB-backed article repository using direct MongoDB connection."""
 from functools import lru_cache
 from typing import Any, Dict, List, Optional
 
-import httpx
+from pymongo import MongoClient, TEXT, ASCENDING, DESCENDING
 
 from src.interfaces.article_store import ArticleStore
 from src.objects.content.processed_article import ProcessedArticle
@@ -10,30 +10,61 @@ from src.utils.services.aws.appconfig_service import get_config_service
 
 
 class MongoDBClient(ArticleStore):
-    """HTTP client wrapping the MongoDB service REST API."""
+    """Direct MongoDB-backed article storage and querying."""
 
     def __init__(self):
-        appconfig = get_config_service()
-        host = appconfig.get("services.mongodb.host", "mongodb-service")
-        port = appconfig.get("services.mongodb.port", 8002)
-        self._base_url = f"http://{host}:{port}"
-        self._client = httpx.Client(timeout=30.0)
+        config = get_config_service()
+        host = config.get("mongodb.host", "mongodb")
+        port = int(config.get("mongodb.port", 27017))
+        database = config.get("mongodb.database", "contentpulse")
+
+        self._client = MongoClient(host=host, port=port)
+        self._db = self._client[database]
+        self._collection = self._db["articles"]
+
+        self._ensure_indexes()
+
+    def _ensure_indexes(self):
+        self._collection.create_index(
+            [("entities.normalized", ASCENDING), ("published_at", DESCENDING)],
+            name="entity_date"
+        )
+        self._collection.create_index(
+            [("categories", ASCENDING), ("published_at", DESCENDING)],
+            name="category_date"
+        )
+        self._collection.create_index(
+            [("source", ASCENDING), ("source_id", ASCENDING)],
+            unique=True,
+            name="source_unique"
+        )
+        self._collection.create_index(
+            [("published_at", DESCENDING)],
+            name="date_desc"
+        )
+        self._collection.create_index(
+            [("entities.type", ASCENDING), ("published_at", DESCENDING)],
+            name="entity_type_date"
+        )
+        self._collection.create_index(
+            [("summary", TEXT), ("title", TEXT)],
+            name="text_search"
+        )
 
     def store_article(self, article: ProcessedArticle) -> Dict[str, Any]:
-        response = self._client.post(
-            f"{self._base_url}/articles",
-            json=article.model_dump(mode="json")
+        doc = article.model_dump(mode="json")
+        self._collection.update_one(
+            {"source": article.source, "source_id": article.source_id},
+            {"$set": doc},
+            upsert=True
         )
-        response.raise_for_status()
-        return response.json()
+        return doc
 
     def article_exists(self, source: str, source_id: str) -> bool:
-        response = self._client.get(
-            f"{self._base_url}/articles/exists",
-            params={"source": source, "source_id": source_id}
-        )
-        response.raise_for_status()
-        return response.json()["exists"]
+        return self._collection.count_documents(
+            {"source": source, "source_id": source_id},
+            limit=1
+        ) > 0
 
     def query_articles(
         self,
@@ -45,36 +76,43 @@ class MongoDBClient(ArticleStore):
         entity_type: Optional[str] = None,
         limit: int = 20
     ) -> List[Dict[str, Any]]:
-        params: Dict[str, Any] = {"limit": limit}
-        if entities:
-            params["entities"] = ",".join(entities)
-        if categories:
-            params["categories"] = ",".join(categories)
-        if sources:
-            params["sources"] = ",".join(sources)
-        if date_from:
-            params["date_from"] = date_from
-        if date_to:
-            params["date_to"] = date_to
-        if entity_type:
-            params["entity_type"] = entity_type
+        query: Dict[str, Any] = {}
 
-        response = self._client.get(f"{self._base_url}/articles", params=params)
-        response.raise_for_status()
-        return response.json()
+        if entities:
+            query["entities.normalized"] = {"$in": entities}
+        if categories:
+            query["categories"] = {"$in": categories}
+        if sources:
+            query["source"] = {"$in": sources}
+        if entity_type:
+            query["entities.type"] = entity_type
+
+        date_filter: Dict[str, Any] = {}
+        if date_from:
+            date_filter["$gte"] = date_from
+        if date_to:
+            date_filter["$lte"] = date_to
+        if date_filter:
+            query["published_at"] = date_filter
+
+        cursor = self._collection.find(
+            query, {"_id": 0}
+        ).sort("published_at", -1).limit(limit)
+
+        return list(cursor)
 
     def search_articles(self, query: str, limit: int = 20) -> List[Dict[str, Any]]:
-        response = self._client.get(
-            f"{self._base_url}/articles/search",
-            params={"q": query, "limit": limit}
-        )
-        response.raise_for_status()
-        return response.json()
+        cursor = self._collection.find(
+            {"$text": {"$search": query}},
+            {"_id": 0, "score": {"$meta": "textScore"}}
+        ).sort([("score", {"$meta": "textScore"})]).limit(limit)
+
+        return list(cursor)
 
     def is_healthy(self) -> bool:
         try:
-            response = self._client.get(f"{self._base_url}/health")
-            return response.status_code == 200
+            self._client.admin.command("ping")
+            return True
         except Exception:
             return False
 
