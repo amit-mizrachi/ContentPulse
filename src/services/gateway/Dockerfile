@@ -1,10 +1,5 @@
-FROM llm-judge-base:latest
-
-COPY services/gateway/ ./services/gateway/
-
-# SERVICE_PORT is set at runtime via environment variable
-# Default ports are centralized in Terragrunt configuration.hcl
+FROM contentpulse-base:latest
 
 EXPOSE 8000
 
-CMD ["python", "-m", "services.gateway.server"]
+CMD ["python", "-m", "src.services.gateway.server"]

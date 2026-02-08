@@ -6,7 +6,6 @@ from google import genai
 from google.genai import types
 
 from src.interfaces.llm_provider import LLMProvider, InferenceConfig, InferenceOutput
-from src.objects.results.inference_result import InferenceResult
 
 
 class GoogleClient(LLMProvider):
@@ -58,19 +57,11 @@ class GoogleClient(LLMProvider):
         system_prompt: Optional[str] = None,
         max_tokens: int = 4096,
         temperature: float = 0.7
-    ) -> InferenceResult:
+    ) -> InferenceOutput:
         config = InferenceConfig(
             model=model,
             temperature=temperature,
             max_tokens=max_tokens,
             system_prompt=system_prompt
         )
-        output = self.generate(prompt, config)
-        return InferenceResult(
-            response=output.response,
-            model=output.model,
-            latency_ms=output.latency_ms,
-            prompt_tokens=output.prompt_tokens,
-            completion_tokens=output.completion_tokens,
-            total_tokens=output.total_tokens
-        )
+        return self.generate(prompt, config)

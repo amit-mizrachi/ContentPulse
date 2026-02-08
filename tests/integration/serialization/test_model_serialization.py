@@ -1,278 +1,93 @@
-"""Integration tests for model serialization.
+"""Integration tests for model serialization round-trips."""
+import json
+from datetime import datetime, timezone
 
-Tests verify that Pydantic models correctly serialize and deserialize
-throughout the request lifecycle, ensuring data integrity across service boundaries.
-"""
 import pytest
 
-
-class TestGatewayRequestSerialization:
-    """Tests for GatewayRequest model serialization."""
-
-    def test_serializes_to_json(self, sample_gateway_request):
-        """GatewayRequest should serialize to valid JSON."""
-        from src.objects.requests.gateway_request import GatewayRequest
-
-        request = GatewayRequest(**sample_gateway_request)
-        json_str = request.model_dump_json()
-
-        assert isinstance(json_str, str)
-        assert "prompt" in json_str
-        assert "target_model" in json_str
-
-    def test_deserializes_from_json(self, sample_gateway_request):
-        """GatewayRequest should deserialize from JSON correctly."""
-        from src.objects.requests.gateway_request import GatewayRequest
-
-        request = GatewayRequest(**sample_gateway_request)
-        json_str = request.model_dump_json()
-        recovered = GatewayRequest.model_validate_json(json_str)
-
-        assert recovered.prompt == sample_gateway_request["prompt"]
-        assert recovered.target_model.name == sample_gateway_request["target_model"]["name"]
-
-    def test_api_key_is_exposed_in_json_serialization(self, sample_gateway_request):
-        """API key should be exposed in JSON for inter-service communication."""
-        from src.objects.requests.gateway_request import GatewayRequest
-        from pydantic import SecretStr
-
-        request = GatewayRequest(**sample_gateway_request)
-        json_str = request.model_dump_json()
-
-        # API key is exposed in JSON (needed for inter-service message passing)
-        assert sample_gateway_request["api_key"] in json_str
-
-    def test_api_key_preserved_in_dict_serialization(self, sample_gateway_request):
-        """API key value can be accessed via model_dump and original object."""
-        from src.objects.requests.gateway_request import GatewayRequest
-        from pydantic import SecretStr
-
-        request = GatewayRequest(**sample_gateway_request)
-
-        # With mode="json", field_serializer exposes the value for inter-service use
-        json_dict = request.model_dump(mode="json")
-        assert json_dict["api_key"] == sample_gateway_request["api_key"]
-
-        # Original object still has SecretStr type
-        assert isinstance(request.api_key, SecretStr)
-        assert request.api_key.get_secret_value() == sample_gateway_request["api_key"]
+from src.objects.content.raw_content import RawContent
+from src.objects.content.processed_article import ProcessedArticle, Entity
+from src.objects.enums.processed_request import ProcessedQuery
+from src.objects.enums.request_stage import RequestStage
+from src.objects.messages.content_message import ContentMessage
+from src.objects.messages.query_message import QueryMessage
+from src.objects.requests.query_request import QueryRequest, QueryFilters
+from src.objects.results.query_result import QueryResult, SourceReference
 
 
-class TestProcessedRequestSerialization:
-    """Tests for ProcessedRequest model serialization."""
+class TestModelSerializationRoundTrips:
+    def test_raw_content_json_roundtrip(self, sample_raw_content):
+        json_str = sample_raw_content.model_dump_json()
+        data = json.loads(json_str)
+        restored = RawContent.model_validate(data)
+        assert restored == sample_raw_content
 
-    def test_serializes_gateway_stage(self, sample_gateway_request):
-        """ProcessedRequest at Gateway stage should serialize correctly."""
-        from src.objects.enums.processed_request import ProcessedRequest
-        from src.objects.requests.gateway_request import GatewayRequest
-        from src.objects.enums.request_stage import RequestStage
+    def test_processed_article_json_roundtrip(self, sample_processed_article):
+        json_str = sample_processed_article.model_dump_json()
+        data = json.loads(json_str)
+        restored = ProcessedArticle.model_validate(data)
+        assert restored.source == sample_processed_article.source
+        assert restored.entities[0].normalized == sample_processed_article.entities[0].normalized
 
-        processed = ProcessedRequest(
-            request_id="test-123",
-            gateway_request=GatewayRequest(**sample_gateway_request),
-            stage=RequestStage.Gateway
+    def test_query_request_with_filters_roundtrip(self):
+        qr = QueryRequest(
+            query="Who scored in the Premier League?",
+            filters=QueryFilters(
+                sources=["reddit", "espn"],
+                categories=["football"],
+                date_from=datetime(2024, 1, 1, tzinfo=timezone.utc),
+                date_to=datetime(2024, 12, 31, tzinfo=timezone.utc),
+            ),
         )
+        json_str = qr.model_dump_json()
+        restored = QueryRequest.model_validate_json(json_str)
+        assert restored.filters.sources == ["reddit", "espn"]
 
-        json_str = processed.model_dump_json()
-        recovered = ProcessedRequest.model_validate_json(json_str)
+    def test_query_result_roundtrip(self, sample_query_result):
+        json_str = sample_query_result.model_dump_json()
+        restored = QueryResult.model_validate_json(json_str)
+        assert restored.answer == sample_query_result.answer
+        assert len(restored.sources) == len(sample_query_result.sources)
 
-        assert recovered.request_id == "test-123"
-        assert recovered.stage == RequestStage.Gateway
-        assert recovered.inference_result is None
-        assert recovered.judge_result is None
-
-    def test_serializes_completed_stage_with_results(
-        self,
-        sample_gateway_request,
-        sample_inference_result,
-        sample_judge_result
-    ):
-        """ProcessedRequest at Completed stage should serialize with all results."""
-        from src.objects.enums.processed_request import ProcessedRequest
-        from src.objects.requests.gateway_request import GatewayRequest
-        from src.objects.enums.request_stage import RequestStage
-        from src.objects.results.inference_result import InferenceResult
-        from src.objects.results.judge_result import JudgeResult
-
-        processed = ProcessedRequest(
-            request_id="test-123",
-            gateway_request=GatewayRequest(**sample_gateway_request),
-            stage=RequestStage.Completed,
-            inference_result=InferenceResult(**sample_inference_result),
-            judge_result=JudgeResult(**sample_judge_result)
+    def test_processed_query_full_lifecycle(self, sample_query_request, sample_query_result):
+        # Gateway stage
+        pq = ProcessedQuery(
+            request_id="lifecycle-1",
+            query_request=sample_query_request,
+            stage=RequestStage.Gateway,
         )
+        s1 = pq.model_dump_json()
+        r1 = ProcessedQuery.model_validate_json(s1)
+        assert r1.stage == RequestStage.Gateway
+        assert r1.query_result is None
 
-        json_str = processed.model_dump_json()
-        recovered = ProcessedRequest.model_validate_json(json_str)
+        # Processing stage
+        pq_processing = r1.model_copy(update={"stage": RequestStage.QueryProcessing})
+        s2 = pq_processing.model_dump_json()
+        r2 = ProcessedQuery.model_validate_json(s2)
+        assert r2.stage == RequestStage.QueryProcessing
 
-        assert recovered.stage == RequestStage.Completed
-        assert recovered.inference_result.response == sample_inference_result["response"]
-        assert recovered.judge_result.score == sample_judge_result["score"]
+        # Completed stage
+        pq_completed = r2.model_copy(update={
+            "stage": RequestStage.Completed,
+            "query_result": sample_query_result,
+        })
+        s3 = pq_completed.model_dump_json()
+        r3 = ProcessedQuery.model_validate_json(s3)
+        assert r3.stage == RequestStage.Completed
+        assert r3.query_result.answer == sample_query_result.answer
 
-    def test_preserves_timestamps(self, sample_gateway_request):
-        """ProcessedRequest should preserve timestamps after serialization."""
-        from src.objects.enums.processed_request import ProcessedRequest
-        from src.objects.requests.gateway_request import GatewayRequest
-        from src.objects.enums.request_stage import RequestStage
-        from datetime import datetime
+    def test_content_message_roundtrip(self, sample_raw_content):
+        msg = ContentMessage(request_id="cm-1", raw_content=sample_raw_content)
+        json_str = msg.model_dump_json()
+        data = json.loads(json_str)
+        restored = ContentMessage.model_validate(data)
+        assert restored.topic_name == "content-raw"
+        assert restored.raw_content.source_id == "abc123"
 
-        processed = ProcessedRequest(
-            request_id="test-123",
-            gateway_request=GatewayRequest(**sample_gateway_request),
-            stage=RequestStage.Gateway
-        )
-
-        original_created = processed.created_at
-        original_updated = processed.updated_at
-
-        json_str = processed.model_dump_json()
-        recovered = ProcessedRequest.model_validate_json(json_str)
-
-        assert isinstance(recovered.created_at, datetime)
-        assert isinstance(recovered.updated_at, datetime)
-
-
-class TestMessageSerialization:
-    """Tests for message model serialization."""
-
-    def test_inference_message_serialization(self, sample_gateway_request):
-        """InferenceMessage should serialize with topic name."""
-        from src.objects.messages.inference_message import InferenceMessage
-        from src.objects.requests.gateway_request import GatewayRequest
-
-        message = InferenceMessage(
-            request_id="test-123",
-            gateway_request=GatewayRequest(**sample_gateway_request)
-        )
-
-        json_str = message.model_dump_json()
-        recovered = InferenceMessage.model_validate_json(json_str)
-
-        assert recovered.topic_name == "inference"
-        assert recovered.request_id == "test-123"
-        assert recovered.gateway_request.prompt == sample_gateway_request["prompt"]
-
-    def test_judge_message_serialization(
-        self,
-        sample_gateway_request,
-        sample_inference_result
-    ):
-        """JudgeMessage should serialize with inference result."""
-        from src.objects.messages.judge_message import JudgeMessage
-        from src.objects.requests.gateway_request import GatewayRequest
-        from src.objects.results.inference_result import InferenceResult
-
-        message = JudgeMessage(
-            request_id="test-123",
-            gateway_request=GatewayRequest(**sample_gateway_request),
-            inference_result=InferenceResult(**sample_inference_result)
-        )
-
-        json_str = message.model_dump_json()
-        recovered = JudgeMessage.model_validate_json(json_str)
-
-        assert recovered.topic_name == "judge"
-        assert recovered.inference_result.response == sample_inference_result["response"]
-
-
-class TestResultSerialization:
-    """Tests for result model serialization."""
-
-    def test_inference_result_serialization(self, sample_inference_result):
-        """InferenceResult should preserve all fields after serialization."""
-        from src.objects.results.inference_result import InferenceResult
-
-        result = InferenceResult(**sample_inference_result)
-
-        json_str = result.model_dump_json()
-        recovered = InferenceResult.model_validate_json(json_str)
-
-        assert recovered.response == sample_inference_result["response"]
-        assert recovered.model == sample_inference_result["model"]
-        assert recovered.latency_ms == sample_inference_result["latency_ms"]
-        assert recovered.prompt_tokens == sample_inference_result["prompt_tokens"]
-        assert recovered.completion_tokens == sample_inference_result["completion_tokens"]
-        assert recovered.total_tokens == sample_inference_result["total_tokens"]
-
-    def test_judge_result_serialization(self, sample_judge_result):
-        """JudgeResult should preserve all fields including categories."""
-        from src.objects.results.judge_result import JudgeResult
-
-        result = JudgeResult(**sample_judge_result)
-
-        json_str = result.model_dump_json()
-        recovered = JudgeResult.model_validate_json(json_str)
-
-        assert recovered.score == sample_judge_result["score"]
-        assert recovered.reasoning == sample_judge_result["reasoning"]
-        assert recovered.model == sample_judge_result["model"]
-        assert recovered.categories["accuracy"] == sample_judge_result["categories"]["accuracy"]
-        assert recovered.categories["relevance"] == sample_judge_result["categories"]["relevance"]
-
-
-class TestFullLifecycleSerialization:
-    """Tests for complete lifecycle serialization."""
-
-    def test_full_lifecycle_data_integrity(
-        self,
-        sample_gateway_request,
-        sample_inference_result,
-        sample_judge_result
-    ):
-        """All models should maintain data integrity through complete lifecycle."""
-        from src.objects.requests.gateway_request import GatewayRequest
-        from src.objects.enums.processed_request import ProcessedRequest
-        from src.objects.enums.request_stage import RequestStage
-        from src.objects.results.inference_result import InferenceResult
-        from src.objects.results.judge_result import JudgeResult
-        from src.objects.messages.inference_message import InferenceMessage
-        from src.objects.messages.judge_message import JudgeMessage
-
-        # Step 1: Create gateway request
-        gateway_request = GatewayRequest(**sample_gateway_request)
-        gateway_json = gateway_request.model_dump_json()
-        gateway_recovered = GatewayRequest.model_validate_json(gateway_json)
-
-        # Step 2: Create inference message
-        inference_message = InferenceMessage(
-            request_id="lifecycle-test",
-            gateway_request=gateway_recovered
-        )
-        inf_msg_json = inference_message.model_dump_json()
-        inf_msg_recovered = InferenceMessage.model_validate_json(inf_msg_json)
-
-        # Step 3: Create inference result
-        inference_result = InferenceResult(**sample_inference_result)
-        inf_result_json = inference_result.model_dump_json()
-        inf_result_recovered = InferenceResult.model_validate_json(inf_result_json)
-
-        # Step 4: Create judge message
-        judge_message = JudgeMessage(
-            request_id="lifecycle-test",
-            gateway_request=inf_msg_recovered.gateway_request,
-            inference_result=inf_result_recovered
-        )
-        judge_msg_json = judge_message.model_dump_json()
-        judge_msg_recovered = JudgeMessage.model_validate_json(judge_msg_json)
-
-        # Step 5: Create judge result
-        judge_result = JudgeResult(**sample_judge_result)
-        judge_result_json = judge_result.model_dump_json()
-        judge_result_recovered = JudgeResult.model_validate_json(judge_result_json)
-
-        # Step 6: Create completed processed request
-        final_request = ProcessedRequest(
-            request_id="lifecycle-test",
-            gateway_request=judge_msg_recovered.gateway_request,
-            stage=RequestStage.Completed,
-            inference_result=judge_msg_recovered.inference_result,
-            judge_result=judge_result_recovered
-        )
-        final_json = final_request.model_dump_json()
-        final_recovered = ProcessedRequest.model_validate_json(final_json)
-
-        # Verify data integrity throughout
-        assert final_recovered.gateway_request.prompt == sample_gateway_request["prompt"]
-        assert final_recovered.inference_result.response == sample_inference_result["response"]
-        assert final_recovered.judge_result.score == sample_judge_result["score"]
-        assert final_recovered.stage == RequestStage.Completed
+    def test_query_message_roundtrip(self, sample_query_request):
+        msg = QueryMessage(request_id="qm-1", query_request=sample_query_request)
+        json_str = msg.model_dump_json()
+        data = json.loads(json_str)
+        restored = QueryMessage.model_validate(data)
+        assert restored.topic_name == "query"
+        assert restored.query_request.query == sample_query_request.query

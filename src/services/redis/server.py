@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException
 
-from src.objects.enums.processed_request import ProcessedRequest
+from src.objects.enums.processed_request import ProcessedQuery
 from src.services.redis.request_repository import RequestRepository
 from src.utils.services.config.ports import get_service_port
 
@@ -12,14 +12,14 @@ SERVICE_PORT_KEY = "services.redis.port"
 DEFAULT_PORT = 8001
 
 
-@app.post("/requests/{request_id}", response_model=ProcessedRequest)
-async def create_request(request_id: str, request: ProcessedRequest):
+@app.post("/requests/{request_id}", response_model=ProcessedQuery)
+async def create_request(request_id: str, request: ProcessedQuery):
     if request.request_id != request_id:
         raise HTTPException(status_code=400, detail="Request ID mismatch")
     return request_repository.create(request)
 
 
-@app.get("/requests/{request_id}", response_model=ProcessedRequest)
+@app.get("/requests/{request_id}", response_model=ProcessedQuery)
 async def get_request(request_id: str):
     request = request_repository.get(request_id)
     if request is None:
@@ -27,7 +27,7 @@ async def get_request(request_id: str):
     return request
 
 
-@app.patch("/requests/{request_id}", response_model=ProcessedRequest)
+@app.patch("/requests/{request_id}", response_model=ProcessedQuery)
 async def update_request(request_id: str, updates: dict):
     request = request_repository.update(request_id, updates)
     if request is None:

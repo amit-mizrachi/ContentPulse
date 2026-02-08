@@ -1,10 +1,9 @@
 version: '3.8'
 
 # ========================================================================
-# LLM-JUDGE DOCKER COMPOSE
+# CONTENTPULSE DOCKER COMPOSE
 # ========================================================================
 # Configuration values from .env file (copy from .env.example)
-# Ports and settings should match deploy/iac/terragrunt/configuration.hcl
 # ========================================================================
 
 services:
@@ -21,19 +20,14 @@ services:
       timeout: ${HEALTH_CHECK_TIMEOUT:-5}s
       retries: ${HEALTH_CHECK_RETRIES:-5}
 
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-llm_judge}
-      MYSQL_USER: ${MYSQL_USER:-llm_judge}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password}
+  mongodb:
+    image: mongo:7
     ports:
-      - "${PORT_MYSQL:-3306}:3306"
+      - "${PORT_MONGODB:-27017}:27017"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mongodb_data:/data/db
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
       interval: ${HEALTH_CHECK_INTERVAL:-10}s
       timeout: ${HEALTH_CHECK_TIMEOUT:-5}s
       retries: 10
@@ -64,15 +58,15 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.base
-    image: llm-judge-base:latest
+    image: contentpulse-base:latest
 
   # Application Services
   redis-service:
     build:
       context: ..
-      dockerfile: ../src/services/redis/Dockerfile
+      dockerfile: src/services/redis/Dockerfile
     ports:
-      - "${PORT_REDIS:-8001}:${PORT_REDIS:-8001}"
+      - "${PORT_REDIS_SERVICE:-8001}:${PORT_REDIS_SERVICE:-8001}"
     environment:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
@@ -80,24 +74,24 @@ services:
       APPCONFIG_APPLICATION_ID: ${APPCONFIG_APPLICATION_ID}
       APPCONFIG_ENVIRONMENT_ID: ${APPCONFIG_ENVIRONMENT_ID}
       APPCONFIG_PROFILE_ID: ${APPCONFIG_PROFILE_ID}
-      SERVICE_PORT: ${PORT_REDIS:-8001}
+      SERVICE_PORT: ${PORT_REDIS_SERVICE:-8001}
     depends_on:
       base-image:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${PORT_REDIS:-8001}${HEALTH_CHECK_PATH:-/health}"]
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT_REDIS_SERVICE:-8001}${HEALTH_CHECK_PATH:-/health}"]
       interval: ${HEALTH_CHECK_INTERVAL:-10}s
       timeout: ${HEALTH_CHECK_TIMEOUT:-5}s
       retries: ${HEALTH_CHECK_RETRIES:-5}
 
-  persistence-service:
+  mongodb-service:
     build:
       context: ..
-      dockerfile: ../src/services/persistence/Dockerfile
+      dockerfile: src/services/mongodb/Dockerfile
     ports:
-      - "${PORT_PERSISTENCE:-8002}:${PORT_PERSISTENCE:-8002}"
+      - "${PORT_MONGODB_SERVICE:-8002}:${PORT_MONGODB_SERVICE:-8002}"
     environment:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
@@ -105,14 +99,14 @@ services:
       APPCONFIG_APPLICATION_ID: ${APPCONFIG_APPLICATION_ID}
       APPCONFIG_ENVIRONMENT_ID: ${APPCONFIG_ENVIRONMENT_ID}
       APPCONFIG_PROFILE_ID: ${APPCONFIG_PROFILE_ID}
-      SERVICE_PORT: ${PORT_PERSISTENCE:-8002}
+      SERVICE_PORT: ${PORT_MONGODB_SERVICE:-8002}
     depends_on:
       base-image:
         condition: service_completed_successfully
-      mysql:
+      mongodb:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${PORT_PERSISTENCE:-8002}${HEALTH_CHECK_PATH:-/health}"]
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT_MONGODB_SERVICE:-8002}${HEALTH_CHECK_PATH:-/health}"]
       interval: ${HEALTH_CHECK_INTERVAL:-10}s
       timeout: ${HEALTH_CHECK_TIMEOUT:-5}s
       retries: ${HEALTH_CHECK_RETRIES:-5}
@@ -120,7 +114,7 @@ services:
   gateway-service:
     build:
       context: ..
-      dockerfile: ../src/services/gateway/Dockerfile
+      dockerfile: src/services/gateway/Dockerfile
     ports:
       - "${PORT_GATEWAY:-8000}:${PORT_GATEWAY:-8000}"
     environment:
@@ -142,12 +136,12 @@ services:
       timeout: ${HEALTH_CHECK_TIMEOUT:-5}s
       retries: ${HEALTH_CHECK_RETRIES:-5}
 
-  inference-service:
+  content-processor-service:
     build:
       context: ..
-      dockerfile: ../src/services/inference/Dockerfile
+      dockerfile: src/services/content_processor/Dockerfile
     ports:
-      - "${PORT_INFERENCE:-8003}:${PORT_INFERENCE:-8003}"
+      - "${PORT_CONTENT_PROCESSOR:-8003}:${PORT_CONTENT_PROCESSOR:-8003}"
     environment:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
@@ -155,24 +149,26 @@ services:
       APPCONFIG_APPLICATION_ID: ${APPCONFIG_APPLICATION_ID}
       APPCONFIG_ENVIRONMENT_ID: ${APPCONFIG_ENVIRONMENT_ID}
       APPCONFIG_PROFILE_ID: ${APPCONFIG_PROFILE_ID}
-      SERVICE_PORT: ${PORT_INFERENCE:-8003}
+      SERVICE_PORT: ${PORT_CONTENT_PROCESSOR:-8003}
     depends_on:
       base-image:
         condition: service_completed_successfully
       redis-service:
         condition: service_healthy
+      mongodb-service:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${PORT_INFERENCE:-8003}${HEALTH_CHECK_PATH:-/health}"]
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT_CONTENT_PROCESSOR:-8003}${HEALTH_CHECK_PATH:-/health}"]
       interval: ${HEALTH_CHECK_INTERVAL:-10}s
       timeout: ${HEALTH_CHECK_TIMEOUT:-5}s
       retries: ${HEALTH_CHECK_RETRIES:-5}
 
-  judge-service:
+  query-engine-service:
     build:
       context: ..
-      dockerfile: ../src/services/judge/Dockerfile
+      dockerfile: src/services/query_engine/Dockerfile
     ports:
-      - "${PORT_JUDGE:-8004}:${PORT_JUDGE:-8004}"
+      - "${PORT_QUERY_ENGINE:-8004}:${PORT_QUERY_ENGINE:-8004}"
     environment:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
@@ -180,21 +176,46 @@ services:
       APPCONFIG_APPLICATION_ID: ${APPCONFIG_APPLICATION_ID}
       APPCONFIG_ENVIRONMENT_ID: ${APPCONFIG_ENVIRONMENT_ID}
       APPCONFIG_PROFILE_ID: ${APPCONFIG_PROFILE_ID}
-      SERVICE_PORT: ${PORT_JUDGE:-8004}
+      SERVICE_PORT: ${PORT_QUERY_ENGINE:-8004}
     depends_on:
       base-image:
         condition: service_completed_successfully
       redis-service:
         condition: service_healthy
-      persistence-service:
+      mongodb-service:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${PORT_JUDGE:-8004}${HEALTH_CHECK_PATH:-/health}"]
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT_QUERY_ENGINE:-8004}${HEALTH_CHECK_PATH:-/health}"]
+      interval: ${HEALTH_CHECK_INTERVAL:-10}s
+      timeout: ${HEALTH_CHECK_TIMEOUT:-5}s
+      retries: ${HEALTH_CHECK_RETRIES:-5}
+
+  content-poller-service:
+    build:
+      context: ..
+      dockerfile: src/services/content_poller/Dockerfile
+    ports:
+      - "${PORT_CONTENT_POLLER:-8005}:${PORT_CONTENT_POLLER:-8005}"
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION:-ap-south-1}
+      APPCONFIG_APPLICATION_ID: ${APPCONFIG_APPLICATION_ID}
+      APPCONFIG_ENVIRONMENT_ID: ${APPCONFIG_ENVIRONMENT_ID}
+      APPCONFIG_PROFILE_ID: ${APPCONFIG_PROFILE_ID}
+      SERVICE_PORT: ${PORT_CONTENT_POLLER:-8005}
+    depends_on:
+      base-image:
+        condition: service_completed_successfully
+      mongodb-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT_CONTENT_POLLER:-8005}${HEALTH_CHECK_PATH:-/health}"]
       interval: ${HEALTH_CHECK_INTERVAL:-10}s
       timeout: ${HEALTH_CHECK_TIMEOUT:-5}s
       retries: ${HEALTH_CHECK_RETRIES:-5}
 
 volumes:
   redis_data:
-  mysql_data:
+  mongodb_data:
   kafka_data:

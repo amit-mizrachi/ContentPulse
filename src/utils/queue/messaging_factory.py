@@ -8,12 +8,12 @@ from src.utils.services.aws.appconfig_service import get_config_service
 
 CONSUMER_CONFIG_KEYS = {
     "sns_sqs": {
-        "inference": "sqs.inference_queue_url",
-        "judge": "sqs.judge_queue_url",
+        "content_processor": "sqs.content_processor_queue_url",
+        "query_engine": "sqs.query_engine_queue_url",
     },
     "kafka": {
-        "inference": "kafka.inference_topic",
-        "judge": "kafka.judge_topic",
+        "content_processor": "kafka.content_raw_topic",
+        "query_engine": "kafka.query_topic",
     },
 }
 

@@ -4,14 +4,14 @@ from typing import Optional
 import redis
 
 from src.utils.services.aws.appconfig_service import get_config_service
-from src.objects.enums.processed_request import ProcessedRequest
+from src.objects.enums.processed_request import ProcessedQuery
 from src.utils.singleton import Singleton
 
 
 class RequestRepository(metaclass=Singleton):
-    """Redis repository for ProcessedRequest objects."""
+    """Redis repository for ProcessedQuery objects."""
 
-    _KEY_PREFIX = "request:"
+    _KEY_PREFIX = "query:"
 
     def __init__(self):
         config = get_config_service()
@@ -21,7 +21,7 @@ class RequestRepository(metaclass=Singleton):
 
         self._client = redis.Redis(host=host, port=port, decode_responses=True)
 
-    def create(self, request: ProcessedRequest) -> ProcessedRequest:
+    def create(self, request: ProcessedQuery) -> ProcessedQuery:
         key = self._make_key(request.request_id)
         self._client.setex(
             key,
@@ -30,16 +30,16 @@ class RequestRepository(metaclass=Singleton):
         )
         return request
 
-    def get(self, request_id: str) -> Optional[ProcessedRequest]:
+    def get(self, request_id: str) -> Optional[ProcessedQuery]:
         key = self._make_key(request_id)
         data = self._client.get(key)
 
         if not data:
             return None
 
-        return ProcessedRequest.model_validate_json(data)
+        return ProcessedQuery.model_validate_json(data)
 
-    def update(self, request_id: str, updates: dict) -> Optional[ProcessedRequest]:
+    def update(self, request_id: str, updates: dict) -> Optional[ProcessedQuery]:
         current_request = self.get(request_id)
         if not current_request:
             return None
@@ -48,7 +48,7 @@ class RequestRepository(metaclass=Singleton):
         req_data.update(updates)
         req_data["updated_at"] = datetime.utcnow()
 
-        updated_request = ProcessedRequest.model_validate(req_data)
+        updated_request = ProcessedQuery.model_validate(req_data)
 
         key = self._make_key(request_id)
         ttl = self._client.ttl(key)

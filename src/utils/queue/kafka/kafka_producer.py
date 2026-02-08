@@ -20,12 +20,12 @@ class KafkaPublisher(MessagePublisher):
 
         self._producer = Producer({
             "bootstrap.servers": self._appconfig.get("kafka.bootstrap_servers"),
-            "client.id": self._appconfig.get("kafka.client_id", "llm-judge-producer"),
+            "client.id": self._appconfig.get("kafka.client_id", "contentpulse-producer"),
         })
 
         self._topic_map = {
-            "inference": self._appconfig.get("kafka.inference_topic"),
-            "judge": self._appconfig.get("kafka.judge_topic"),
+            "content-raw": self._appconfig.get("kafka.content_raw_topic"),
+            "query": self._appconfig.get("kafka.query_topic"),
         }
 
     def publish(self, topic_name: str, message: str) -> bool:

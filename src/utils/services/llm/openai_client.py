@@ -5,7 +5,6 @@ from typing import Optional
 from openai import OpenAI
 
 from src.interfaces.llm_provider import LLMProvider, InferenceConfig, InferenceOutput
-from src.objects.results.inference_result import InferenceResult
 
 DEFAULT_MAX_TOKENS = 4096
 DEFAULT_TEMPERATURE = 0.7
@@ -68,19 +67,11 @@ class OpenAIClient(LLMProvider):
         self,
         prompt: str,
         config: Optional[InferenceConfig] = None
-    ) -> InferenceResult:
+    ) -> InferenceOutput:
         if config is None:
             config = InferenceConfig(
                 model=DEFAULT_MODEL,
                 temperature=DEFAULT_TEMPERATURE,
                 max_tokens=DEFAULT_MAX_TOKENS
             )
-        output = self.generate(prompt, config)
-        return InferenceResult(
-            response=output.response,
-            model=output.model,
-            latency_ms=output.latency_ms,
-            prompt_tokens=output.prompt_tokens,
-            completion_tokens=output.completion_tokens,
-            total_tokens=output.total_tokens
-        )
+        return self.generate(prompt, config)

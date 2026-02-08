@@ -1,47 +1,48 @@
+"""Gateway Service - REST API for query submission and status retrieval."""
 import uvicorn
 from fastapi import FastAPI, HTTPException
 
-from src.services.gateway.request_submission_service import RequestSubmissionService
-from src.objects.requests.gateway_request import GatewayRequest
+from src.services.gateway.query_submission_service import QuerySubmissionService
+from src.objects.requests.query_request import QueryRequest
 from src.utils.observability.logs.logger import Logger
 from src.utils.queue.messaging_factory import get_message_publisher
 from src.utils.services.aws.appconfig_service import get_config_service
 from src.utils.services.clients.redis_client import get_state_repository
 from src.utils.services.config.ports import get_service_port
 
-app = FastAPI(title="Gateway Service")
+app = FastAPI(title="ContentPulse Gateway")
 logger = Logger()
 
 SERVICE_PORT_KEY = "services.gateway.port"
 
 
-def create_request_service() -> RequestSubmissionService:
+def create_query_service() -> QuerySubmissionService:
     config_service = get_config_service()
-    return RequestSubmissionService(
+    return QuerySubmissionService(
         state_repository=get_state_repository(),
         message_publisher=get_message_publisher(),
-        inference_topic=config_service.get("topics.inference", "inference"),
+        query_topic=config_service.get("topics.query", "query"),
     )
 
 
-request_service = create_request_service()
+query_service = create_query_service()
 
 
-@app.post("/submit")
-async def submit_request(gateway_request: GatewayRequest):
-    logger.info("Submitting request")
-    response = request_service.submit_request(gateway_request)
-    logger.info(f"Successfully submitted request {response.request_id}")
+@app.post("/query")
+async def submit_query(query_request: QueryRequest):
+    logger.info("Submitting query")
+    response = query_service.submit_query(query_request)
+    logger.info(f"Successfully submitted query {response.request_id}")
     return response
 
 
-@app.get("/metadata/{request_id}")
-async def get_request_metadata(request_id: str):
-    logger.info(f"Getting request metadata for {request_id}")
+@app.get("/query/{request_id}")
+async def get_query_status(request_id: str):
+    logger.info(f"Getting query status for {request_id}")
     try:
-        response = request_service.get_request_metadata(request_id)
-        logger.info(f"Successfully got metadata for {request_id}")
-        return response
+        result = query_service.get_query_status(request_id)
+        logger.info(f"Successfully got status for {request_id}")
+        return result
     except KeyError as e:
         raise HTTPException(status_code=404, detail=str(e))
 

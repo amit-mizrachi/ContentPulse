@@ -1,4 +1,3 @@
-from src.objects.results.inference_result import InferenceResult
-from src.objects.results.judge_result import JudgeResult
+from src.objects.results.query_result import QueryResult, SourceReference
 
-__all__ = ["InferenceResult", "JudgeResult"]
+__all__ = ["QueryResult", "SourceReference"]

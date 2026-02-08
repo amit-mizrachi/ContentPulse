@@ -3,7 +3,6 @@ from enum import Enum
 
 class RequestStage(str, Enum):
     Gateway = "Gateway"
-    Inference = "Inference"
-    Judge = "Judge"
+    QueryProcessing = "QueryProcessing"
     Completed = "Completed"
     Failed = "Failed"

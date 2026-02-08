@@ -6,7 +6,7 @@ import httpx
 
 from src.interfaces.state_repository import StateRepository
 from src.utils.services.aws.appconfig_service import get_config_service
-from src.objects.enums.processed_request import ProcessedRequest
+from src.objects.enums.processed_request import ProcessedQuery
 
 
 class RedisClient(StateRepository):
@@ -58,23 +58,23 @@ class RedisClient(StateRepository):
         except Exception:
             return False
 
-    def create_request(self, request: ProcessedRequest) -> ProcessedRequest:
-        data = self.create(request.request_id, request.model_dump(mode="json"))
-        return ProcessedRequest.model_validate(data)
+    def create_query(self, query: ProcessedQuery) -> ProcessedQuery:
+        data = self.create(query.request_id, query.model_dump(mode="json"))
+        return ProcessedQuery.model_validate(data)
 
-    def get_request(self, request_id: str) -> Optional[ProcessedRequest]:
+    def get_query(self, request_id: str) -> Optional[ProcessedQuery]:
         data = self.get(request_id)
         if data is None:
             return None
-        return ProcessedRequest.model_validate(data)
+        return ProcessedQuery.model_validate(data)
 
-    def update_request(self, request_id: str, updates: dict) -> Optional[ProcessedRequest]:
+    def update_query(self, request_id: str, updates: dict) -> Optional[ProcessedQuery]:
         data = self.update(request_id, updates)
         if data is None:
             return None
-        return ProcessedRequest.model_validate(data)
+        return ProcessedQuery.model_validate(data)
 
-    def delete_request(self, request_id: str) -> bool:
+    def delete_query(self, request_id: str) -> bool:
         return self.delete(request_id)
 
     def health_check(self) -> bool:
