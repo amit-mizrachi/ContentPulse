@@ -35,14 +35,14 @@ class TestProcessedArticle:
         json_str = sample_processed_article.model_dump_json()
         restored = ProcessedArticle.model_validate_json(json_str)
         assert restored.summary == "Manchester United completed a new striker signing from an Italian club."
-        assert len(restored.entities) == 1
+        assert len(restored.entities) == 3
         assert restored.entities[0].normalized == "manchester_united"
-        assert "football" in restored.categories
+        assert "transfer" in restored.categories
 
     def test_entity_model(self):
-        entity = Entity(name="Cristiano Ronaldo", type="person", normalized="cristiano_ronaldo")
+        entity = Entity(name="Cristiano Ronaldo", type="player", normalized="cristiano_ronaldo")
         data = entity.model_dump()
-        assert data["type"] == "person"
+        assert data["type"] == "player"
 
 
 class TestQueryRequest:

@@ -39,6 +39,10 @@ class MongoDBProvider(metaclass=Singleton):
             name="date_desc"
         )
         articles.create_index(
+            [("entities.type", ASCENDING), ("published_at", DESCENDING)],
+            name="entity_type_date"
+        )
+        articles.create_index(
             [("summary", TEXT), ("title", TEXT)],
             name="text_search"
         )

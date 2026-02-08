@@ -56,8 +56,10 @@ def sample_processed_article():
         summary="Manchester United completed a new striker signing from an Italian club.",
         entities=[
             Entity(name="Manchester United", type="team", normalized="manchester_united"),
+            Entity(name="Premier League", type="league", normalized="premier_league"),
+            Entity(name="Football", type="sport", normalized="football"),
         ],
-        categories=["football", "premier_league", "transfer"],
+        categories=["transfer"],
         sentiment="positive",
         published_at=datetime(2024, 6, 15, 12, 0, 0, tzinfo=timezone.utc),
         processing_model="gemini-2.0-flash",

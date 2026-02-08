@@ -15,9 +15,15 @@ from src.utils.observability.logs.logger import Logger
 
 INTENT_PROMPT = """Parse this sports query and return a JSON object with:
 - "entities": Array of normalized entity strings to search (e.g. ["manchester_united", "cristiano_ronaldo"])
-- "categories": Array of category strings (e.g. ["football", "transfer"])
+- "categories": Array of category strings (e.g. ["transfer", "injury", "match_result"])
+- "entity_type": If the query asks for a specific type of entity, set this to "player"|"team"|"league"|"sport"|"venue", otherwise null
 - "date_context": "recent" | "today" | "this_week" | "this_month" | null
 - "search_terms": A text search query string for full-text search
+
+Examples:
+- "Show me all NBA teams" -> {{"entities": ["nba"], "entity_type": "team", ...}}
+- "What players are in the Premier League?" -> {{"entities": ["premier_league"], "entity_type": "player", ...}}
+- "Latest Manchester United news" -> {{"entities": ["manchester_united"], "entity_type": null, ...}}
 
 Query: {query}
 
@@ -114,19 +120,21 @@ class QueryEngineOrchestrator(MessageHandler):
         # Try structured query first
         entities = intent.get("entities", [])
         categories = intent.get("categories", [])
+        entity_type = intent.get("entity_type")
 
         filters = message.query_request.filters
         sources = filters.sources if filters and filters.sources else None
         date_from = filters.date_from.isoformat() if filters and filters.date_from else None
         date_to = filters.date_to.isoformat() if filters and filters.date_to else None
 
-        if entities or categories:
+        if entities or categories or entity_type:
             articles = self._content_repository.query_articles(
                 entities=entities or None,
                 categories=categories or None,
                 sources=sources,
                 date_from=date_from,
                 date_to=date_to,
+                entity_type=entity_type,
                 limit=20,
             )
 

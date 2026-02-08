@@ -22,8 +22,12 @@ class TestContentProcessorOrchestrator:
     def test_handle_success(self, orchestrator, mock_content_repository, mock_llm_provider, sample_raw_content):
         llm_response = json.dumps({
             "summary": "Man United signed a striker",
-            "entities": [{"name": "Manchester United", "type": "team", "normalized": "manchester_united"}],
-            "categories": ["football", "transfer"],
+            "entities": [
+                {"name": "Manchester United", "type": "team", "normalized": "manchester_united"},
+                {"name": "Premier League", "type": "league", "normalized": "premier_league"},
+                {"name": "Football", "type": "sport", "normalized": "football"},
+            ],
+            "categories": ["transfer"],
             "sentiment": "positive",
         })
         mock_llm_provider.run_inference.return_value = InferenceOutput(
@@ -44,8 +48,10 @@ class TestContentProcessorOrchestrator:
         stored_article = mock_content_repository.store_article.call_args[0][0]
         assert stored_article.summary == "Man United signed a striker"
         assert stored_article.sentiment == "positive"
-        assert len(stored_article.entities) == 1
+        assert len(stored_article.entities) == 3
         assert stored_article.entities[0].normalized == "manchester_united"
+        assert stored_article.entities[1].type == "league"
+        assert stored_article.entities[2].type == "sport"
 
     def test_handle_llm_failure(self, orchestrator, mock_llm_provider, sample_raw_content):
         mock_llm_provider.run_inference.side_effect = Exception("LLM error")

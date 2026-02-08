@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 class Entity(BaseModel):
     name: str
-    type: str  # person, team, league, venue
+    type: str  # player, team, league, sport, venue
     normalized: str
 
 

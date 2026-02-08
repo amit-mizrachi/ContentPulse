@@ -24,7 +24,8 @@ class TestQueryEngineOrchestrator:
         # Setup: intent parsing response
         intent_response = json.dumps({
             "entities": ["manchester_united"],
-            "categories": ["football", "transfer"],
+            "categories": ["transfer"],
+            "entity_type": None,
             "date_context": "recent",
             "search_terms": "Manchester United transfer",
         })
@@ -89,6 +90,7 @@ class TestQueryEngineOrchestrator:
         intent_response = json.dumps({
             "entities": ["obscure_team"],
             "categories": [],
+            "entity_type": None,
             "date_context": None,
             "search_terms": "obscure team news",
         })

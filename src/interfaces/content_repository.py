@@ -24,6 +24,7 @@ class ContentRepository(ABC):
         sources: Optional[List[str]] = None,
         date_from: Optional[str] = None,
         date_to: Optional[str] = None,
+        entity_type: Optional[str] = None,
         limit: int = 20
     ) -> List[Dict[str, Any]]:
         pass

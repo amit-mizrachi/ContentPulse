@@ -13,9 +13,24 @@ from src.utils.observability.logs.logger import Logger
 
 PROCESSING_PROMPT = """Analyze this sports article and return a JSON object with:
 - "summary": A 2-3 sentence summary
-- "entities": Array of {{"name": str, "type": "person"|"team"|"league"|"venue", "normalized": str (lowercase, no spaces)}}
-- "categories": Array of strings (e.g. "football", "premier_league", "transfer", "injury")
+- "entities": Array of extracted entities (see rules below)
+- "categories": Array of topic tags (e.g. "transfer", "injury", "match_result", "contract", "retirement")
 - "sentiment": "positive"|"negative"|"neutral"
+
+Entity extraction rules:
+1. Each entity: {{"name": str, "type": "player"|"team"|"league"|"sport"|"venue", "normalized": str}}
+2. "normalized" must be lowercase with underscores, no special characters (e.g. "kylian_mbappe", "premier_league")
+3. CRITICAL: Extract BOTH explicit AND implicit entities. Use your world knowledge:
+   - If a player is mentioned, also add their current team, league, and sport as separate entities
+   - If a team is mentioned, also add their league and sport
+   - If a league is mentioned, also add the sport
+4. Extract ALL mentioned players, teams, leagues, sports, and venues — not just the main subject
+
+Example: An article mentioning only "LeBron James" should produce:
+- {{"name": "LeBron James", "type": "player", "normalized": "lebron_james"}}
+- {{"name": "Los Angeles Lakers", "type": "team", "normalized": "los_angeles_lakers"}}
+- {{"name": "NBA", "type": "league", "normalized": "nba"}}
+- {{"name": "Basketball", "type": "sport", "normalized": "basketball"}}
 
 Article title: {title}
 Article content: {content}

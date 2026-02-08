@@ -36,6 +36,7 @@ class ArticleRepository(ContentRepository):
         sources: Optional[List[str]] = None,
         date_from: Optional[str] = None,
         date_to: Optional[str] = None,
+        entity_type: Optional[str] = None,
         limit: int = 20
     ) -> List[Dict[str, Any]]:
         query: Dict[str, Any] = {}
@@ -46,6 +47,8 @@ class ArticleRepository(ContentRepository):
             query["categories"] = {"$in": categories}
         if sources:
             query["source"] = {"$in": sources}
+        if entity_type:
+            query["entities.type"] = entity_type
 
         date_filter: Dict[str, Any] = {}
         if date_from:
