@@ -5,7 +5,7 @@ from src.interfaces.message_publisher import MessagePublisher
 from src.interfaces.state_repository import StateRepository
 from src.objects.enums.request_stage import RequestStage
 from src.objects.enums.request_status import RequestStatus
-from src.objects.enums.processed_request import ProcessedQuery
+from src.objects.requests.processed_request import ProcessedQuery
 from src.objects.messages.query_message import QueryMessage
 from src.objects.requests.query_request import QueryRequest
 from src.objects.responses.query_response import QueryResponse

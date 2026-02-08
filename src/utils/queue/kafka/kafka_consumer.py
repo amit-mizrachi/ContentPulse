@@ -6,7 +6,7 @@ from confluent_kafka import Consumer, KafkaError
 
 from src.interfaces.message_consumer import AsyncMessageConsumer
 from src.utils.observability.logs.logger import Logger
-from src.utils.queue.queue_message_handler import QueueMessageHandler
+from src.interfaces.message_dispatcher import MessageDispatcher
 from src.utils.services.aws.appconfig_service import get_config_service
 
 
@@ -17,7 +17,7 @@ class KafkaConsumer(AsyncMessageConsumer):
     matching the pattern used by SQSConsumer.
     """
 
-    def __init__(self, message_handler: QueueMessageHandler, topic_config_key: str):
+    def __init__(self, message_handler: MessageDispatcher, topic_config_key: str):
         self._appconfig = get_config_service()
         self._logger = Logger()
         self._handler = message_handler
@@ -84,6 +84,6 @@ class KafkaConsumer(AsyncMessageConsumer):
         self._logger.info(f"Kafka consumer for topic {self._topic} closed")
 
 
-def get_kafka_consumer(handler: QueueMessageHandler, topic_config_key: str) -> KafkaConsumer:
+def get_kafka_consumer(handler: MessageDispatcher, topic_config_key: str) -> KafkaConsumer:
     """Create a KafkaConsumer instance."""
     return KafkaConsumer(handler, topic_config_key)

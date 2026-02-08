@@ -2,14 +2,14 @@ import asyncio
 
 from src.interfaces.message_consumer import AsyncMessageConsumer
 from src.utils.observability.logs.logger import Logger
-from src.utils.queue.queue_message_handler import QueueMessageHandler
+from src.interfaces.message_dispatcher import MessageDispatcher
 from src.utils.queue.sqs.sqs_message_processor import SQSMessageProcessor
 from src.utils.queue.sqs.sqs_poller import SQSPoller
 from src.utils.queue.sqs.sqs_visibility_extender import SQSVisibilityExtender
 
 
 class SQSConsumer(AsyncMessageConsumer):
-    def __init__(self, message_handler: QueueMessageHandler, queue_config_key: str = "sqs.queue_url"):
+    def __init__(self, message_handler: MessageDispatcher, queue_config_key: str = "sqs.queue_url"):
         self.__logger = Logger()
 
         self.__visibility_extender = SQSVisibilityExtender(queue_config_key)
@@ -59,5 +59,5 @@ class SQSConsumer(AsyncMessageConsumer):
         self.__processor.close()
 
 
-def get_sqs_consumer(handler: QueueMessageHandler, queue_config_key: str = "sqs.queue_url") -> SQSConsumer:
+def get_sqs_consumer(handler: MessageDispatcher, queue_config_key: str = "sqs.queue_url") -> SQSConsumer:
     return SQSConsumer(handler, queue_config_key)

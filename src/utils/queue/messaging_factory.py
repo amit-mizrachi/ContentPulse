@@ -3,7 +3,7 @@ from functools import lru_cache
 
 from src.interfaces.message_consumer import AsyncMessageConsumer
 from src.interfaces.message_publisher import MessagePublisher
-from src.utils.queue.queue_message_handler import QueueMessageHandler
+from src.interfaces.message_dispatcher import MessageDispatcher
 from src.utils.services.aws.appconfig_service import get_config_service
 
 CONSUMER_CONFIG_KEYS = {
@@ -31,7 +31,7 @@ def get_message_publisher() -> MessagePublisher:
     return get_sns_service()
 
 
-def get_message_consumer(handler: QueueMessageHandler, service_name: str) -> AsyncMessageConsumer:
+def get_message_consumer(handler: MessageDispatcher, service_name: str) -> AsyncMessageConsumer:
     config = get_config_service()
     broker = config.get("messaging.broker", "sns_sqs")
     config_key = CONSUMER_CONFIG_KEYS[broker][service_name]

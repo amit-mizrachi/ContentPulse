@@ -6,7 +6,7 @@ import httpx
 
 from src.interfaces.state_repository import StateRepository
 from src.utils.services.aws.appconfig_service import get_config_service
-from src.objects.enums.processed_request import ProcessedQuery
+from src.objects.requests.processed_request import ProcessedQuery
 
 
 class RedisClient(StateRepository):

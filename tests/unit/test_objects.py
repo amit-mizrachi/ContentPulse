@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 from src.objects.content.raw_content import RawContent
 from src.objects.content.processed_article import ProcessedArticle, Entity
-from src.objects.enums.processed_request import ProcessedQuery
+from src.objects.requests.processed_request import ProcessedQuery
 from src.objects.enums.request_stage import RequestStage
 from src.objects.messages.content_message import ContentMessage
 from src.objects.messages.query_message import QueryMessage

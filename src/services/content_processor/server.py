@@ -5,7 +5,7 @@ import signal
 from src.services.content_processor.content_processor_orchestrator import ContentProcessorOrchestrator
 from src.utils.observability.logs.logger import Logger
 from src.utils.queue.messaging_factory import get_message_consumer
-from src.utils.queue.queue_message_handler import QueueMessageHandler
+from src.utils.queue.queue_message_handler import ThreadPoolMessageDispatcher
 from src.utils.services.aws.appconfig_service import get_config_service
 from src.utils.services.clients.mongodb_client import get_content_repository
 from src.utils.services.config.health import start_health_server_background
@@ -32,7 +32,7 @@ async def main():
     logger.info("Starting Content Processor Service")
 
     orchestrator = create_content_processor_orchestrator()
-    handler = QueueMessageHandler(orchestrator)
+    handler = ThreadPoolMessageDispatcher(orchestrator)
     consumer = get_message_consumer(handler, service_name="content_processor")
 
     port = get_service_port(SERVICE_PORT_KEY, default=DEFAULT_PORT)

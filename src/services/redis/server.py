@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException
 
-from src.objects.enums.processed_request import ProcessedQuery
+from src.objects.requests.processed_request import ProcessedQuery
 from src.services.redis.request_repository import RequestRepository
 from src.utils.services.config.ports import get_service_port
 
@@ -16,23 +16,24 @@ DEFAULT_PORT = 8001
 async def create_request(request_id: str, request: ProcessedQuery):
     if request.request_id != request_id:
         raise HTTPException(status_code=400, detail="Request ID mismatch")
-    return request_repository.create(request)
+    data = request_repository.create(request_id, request.model_dump(mode="json"))
+    return ProcessedQuery.model_validate(data)
 
 
 @app.get("/requests/{request_id}", response_model=ProcessedQuery)
 async def get_request(request_id: str):
-    request = request_repository.get(request_id)
-    if request is None:
+    data = request_repository.get(request_id)
+    if data is None:
         raise HTTPException(status_code=404, detail="Request not found")
-    return request
+    return ProcessedQuery.model_validate(data)
 
 
 @app.patch("/requests/{request_id}", response_model=ProcessedQuery)
 async def update_request(request_id: str, updates: dict):
-    request = request_repository.update(request_id, updates)
-    if request is None:
+    data = request_repository.update(request_id, updates)
+    if data is None:
         raise HTTPException(status_code=404, detail="Request not found")
-    return request
+    return ProcessedQuery.model_validate(data)
 
 
 @app.delete("/requests/{request_id}")

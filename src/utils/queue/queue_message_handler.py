@@ -1,10 +1,11 @@
 from src.interfaces.message_handler import MessageHandler
+from src.interfaces.message_dispatcher import MessageDispatcher
 from src.utils.services.aws.appconfig_service import get_config_service
 from src.utils.observability.logs.logger import Logger
 from src.utils.queue.context_preserving_executor import ContextPreservingExecutor
 
 
-class QueueMessageHandler:
+class ThreadPoolMessageDispatcher(MessageDispatcher):
     def __init__(self, handler: MessageHandler, max_worker_count: int = None):
         self.__appconfig = get_config_service()
         self.__logger = Logger()

@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from src.interfaces.llm_provider import InferenceOutput
-from src.objects.enums.processed_request import ProcessedQuery
+from src.objects.requests.processed_request import ProcessedQuery
 from src.objects.enums.request_stage import RequestStage
 from src.objects.enums.request_status import RequestStatus
 from src.objects.requests.query_request import QueryRequest

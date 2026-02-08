@@ -1,15 +1,16 @@
+import json
 from datetime import datetime
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import redis
 
+from src.interfaces.state_repository import StateRepository
 from src.utils.services.aws.appconfig_service import get_config_service
-from src.objects.enums.processed_request import ProcessedQuery
 from src.utils.singleton import Singleton
 
 
-class RequestRepository(metaclass=Singleton):
-    """Redis repository for ProcessedQuery objects."""
+class RequestRepository(StateRepository, metaclass=Singleton):
+    """Redis-backed implementation of StateRepository."""
 
     _KEY_PREFIX = "query:"
 
@@ -21,42 +22,39 @@ class RequestRepository(metaclass=Singleton):
 
         self._client = redis.Redis(host=host, port=port, decode_responses=True)
 
-    def create(self, request: ProcessedQuery) -> ProcessedQuery:
-        key = self._make_key(request.request_id)
+    def create(self, request_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        key = self._make_key(request_id)
         self._client.setex(
             key,
             self._default_ttl,
-            request.model_dump_json()
+            json.dumps(data)
         )
-        return request
+        return data
 
-    def get(self, request_id: str) -> Optional[ProcessedQuery]:
+    def get(self, request_id: str) -> Optional[Dict[str, Any]]:
         key = self._make_key(request_id)
-        data = self._client.get(key)
+        raw = self._client.get(key)
 
-        if not data:
+        if not raw:
             return None
 
-        return ProcessedQuery.model_validate_json(data)
+        return json.loads(raw)
 
-    def update(self, request_id: str, updates: dict) -> Optional[ProcessedQuery]:
-        current_request = self.get(request_id)
-        if not current_request:
+    def update(self, request_id: str, updates: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        current_data = self.get(request_id)
+        if not current_data:
             return None
 
-        req_data = current_request.model_dump()
-        req_data.update(updates)
-        req_data["updated_at"] = datetime.utcnow()
-
-        updated_request = ProcessedQuery.model_validate(req_data)
+        current_data.update(updates)
+        current_data["updated_at"] = datetime.utcnow().isoformat()
 
         key = self._make_key(request_id)
         ttl = self._client.ttl(key)
         actual_ttl = ttl if ttl > 0 else self._default_ttl
 
-        self._client.setex(key, actual_ttl, updated_request.model_dump_json())
+        self._client.setex(key, actual_ttl, json.dumps(current_data))
 
-        return updated_request
+        return current_data
 
     def delete(self, request_id: str) -> bool:
         key = self._make_key(request_id)
