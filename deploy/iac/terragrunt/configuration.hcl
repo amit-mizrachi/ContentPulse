@@ -276,6 +276,7 @@ locals {
 
     endpoint_private_access = true
     endpoint_public_access  = true
+    public_access_cidrs     = ["0.0.0.0/0"]  # TODO: Restrict to your VPN/office IP (e.g., ["203.0.113.0/24"])
 
     system_node_group = {
       name           = "system"
@@ -424,6 +425,50 @@ locals {
   }
 
   # ========================================================================
+  # OBSERVABILITY CONFIGURATION (Grafana Alloy + Grafana Cloud)
+  # ========================================================================
+  observability_config = {
+    namespace = "observability-system"
+
+    # Grafana Alloy Helm chart
+    alloy = {
+      chart_version = "0.12.0"
+    }
+
+    # kube-state-metrics for cluster-level K8s metrics
+    kube_state_metrics = {
+      chart_version = "5.25.1"
+    }
+
+    # Grafana Cloud authentication
+    # Populate these with your Grafana Cloud instance details
+    grafana_cloud = {
+      instance_id = ""  # Your Grafana Cloud instance ID (numeric)
+      api_key     = ""  # Your Grafana Cloud API key (token)
+    }
+
+    # Backend endpoints (Grafana Cloud)
+    # Replace XXX with your Grafana Cloud stack region slug
+    endpoints = {
+      loki_url                    = "https://logs-prod-XXX.grafana.net/loki/api/v1/push"
+      tempo_endpoint              = "tempo-XXX.grafana.net:443"
+      prometheus_remote_write_url = "https://prometheus-prod-XXX.grafana.net/api/prom/push"
+    }
+
+    # Alloy DaemonSet resources (logs + node metrics collector, runs on every node)
+    daemonset_resources = {
+      requests = { cpu = "100m", memory = "256Mi" }
+      limits   = { cpu = "500m", memory = "512Mi" }
+    }
+
+    # Alloy Deployment resources (trace receiver, 2 replicas on system nodes)
+    deployment_resources = {
+      requests = { cpu = "100m", memory = "256Mi" }
+      limits   = { cpu = "500m", memory = "512Mi" }
+    }
+  }
+
+  # ========================================================================
   # SNS CONFIGURATION
   # ========================================================================
   sns_config = {
@@ -474,6 +519,15 @@ locals {
       }
       redis = {
         default_ttl_seconds = local.redis_k8s_config.default_ttl_seconds
+      }
+      observability = {
+        traces = {
+          collector = {
+            endpoint = "http://alloy-traces.${local.observability_config.namespace}.svc.cluster.local:4318/v1/traces"
+          }
+          sample_rate              = 1.0     # 100% for dev, reduce for prod
+          tracer_flush_timeout_ms  = 30000
+        }
       }
       http_timeouts = local.http_timeouts
       health_check  = local.health_check

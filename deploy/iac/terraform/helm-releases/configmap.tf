@@ -41,6 +41,8 @@ resource "kubernetes_config_map" "infra_config" {
     APPCONFIG_ENVIRONMENT_ID = var.appconfig_ids.environment_id
     APPCONFIG_PROFILE_ID     = var.appconfig_ids.profile_id
 
+    OTEL_EXPORTER_OTLP_TRACES_ENDPOINT = "http://alloy-traces.${var.observability_config.namespace}.svc.cluster.local:4318/v1/traces"
+
     ENVIRONMENT = var.environment
     NAMESPACE   = var.namespace
   }

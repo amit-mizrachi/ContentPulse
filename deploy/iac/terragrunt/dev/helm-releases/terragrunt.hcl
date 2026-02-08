@@ -228,4 +228,6 @@ inputs = {
 
   autoscaling = include.root.inputs.autoscaling
   common_tags = include.root.inputs.common_tags
+
+  observability_config = include.root.inputs.observability_config
 }

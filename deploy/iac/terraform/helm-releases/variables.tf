@@ -202,6 +202,15 @@ variable "autoscaling" {
 }
 
 # ========================================================================
+# OBSERVABILITY CONFIGURATION
+# ========================================================================
+variable "observability_config" {
+  description = "Observability configuration (Alloy, kube-state-metrics, Grafana Cloud endpoints)"
+  type        = any
+  default     = {}
+}
+
+# ========================================================================
 # COMMON TAGS
 # ========================================================================
 variable "common_tags" {

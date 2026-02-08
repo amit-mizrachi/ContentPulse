@@ -43,6 +43,32 @@ output "system_releases" {
       version   = helm_release.strimzi_operator_release.version
       status    = helm_release.strimzi_operator_release.status
     }
+    kube_state_metrics = {
+      name      = helm_release.kube_state_metrics_release.name
+      namespace = helm_release.kube_state_metrics_release.namespace
+      version   = helm_release.kube_state_metrics_release.version
+      status    = helm_release.kube_state_metrics_release.status
+    }
+    alloy_logs_metrics = {
+      name      = helm_release.alloy_daemonset_release.name
+      namespace = helm_release.alloy_daemonset_release.namespace
+      version   = helm_release.alloy_daemonset_release.version
+      status    = helm_release.alloy_daemonset_release.status
+    }
+    alloy_traces = {
+      name      = helm_release.alloy_traces_release.name
+      namespace = helm_release.alloy_traces_release.namespace
+      version   = helm_release.alloy_traces_release.version
+      status    = helm_release.alloy_traces_release.status
+    }
+  }
+}
+
+output "alloy_trace_receiver_endpoint" {
+  description = "Alloy OTLP trace receiver endpoint for application configuration"
+  value = {
+    otlp_http = "http://alloy-traces.${var.observability_config.namespace}.svc.cluster.local:4318/v1/traces"
+    otlp_grpc = "alloy-traces.${var.observability_config.namespace}.svc.cluster.local:4317"
   }
 }
 
