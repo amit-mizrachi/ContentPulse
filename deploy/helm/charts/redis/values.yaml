@@ -1,0 +1,85 @@
+# ========================================================================
+# REDIS HELM CHART - DEFAULT VALUES
+# ========================================================================
+# Override these values in releases/redis-values.yaml
+# ========================================================================
+
+image:
+  repository: redis
+  tag: "7.1-alpine"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: "redis"
+
+service:
+  type: ClusterIP
+  port: 6379
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+persistence:
+  enabled: true
+  storageClassName: "gp3"
+  accessMode: ReadWriteOnce
+  size: 10Gi
+
+# Redis configuration
+config:
+  maxmemory: "256mb"
+  maxmemoryPolicy: "allkeys-lru"
+  save: "900 1 300 10 60 10000"  # RDB snapshots
+  appendonly: "yes"               # AOF persistence
+  appendfsync: "everysec"
+
+# Security
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 999
+  fsGroup: 999
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+
+# Node selection
+nodeSelector:
+  role: application
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - redis
+          topologyKey: kubernetes.io/hostname
+
+# Liveness and readiness probes
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3

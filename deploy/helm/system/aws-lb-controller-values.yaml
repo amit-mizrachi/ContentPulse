@@ -1,0 +1,40 @@
+# AWS Load Balancer Controller Values
+# Helm chart: eks/aws-load-balancer-controller
+# Docs: https://kubernetes-sigs.github.io/aws-load-balancer-controller
+
+clusterName: dev-llm-judge-cluster
+
+serviceAccount:
+  create: true
+  name: aws-load-balancer-controller
+  annotations:
+    # IMPORTANT: Update with actual IAM role ARN after terraform apply
+    # Role ARN set dynamically by Terraform Helm provider
+    eks.amazonaws.com/role-arn: ""
+
+region: ap-south-1
+vpcId: ""  # Auto-discovered
+
+# Resource configuration
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+# Replica count
+replicaCount: 1  # 2 for production
+
+# Enable shield, waf, wafv2 (all false for dev to save costs)
+enableShield: false
+enableWaf: false
+enableWafv2: false
+
+# Logging
+logLevel: info
+
+# Pod configuration
+podLabels:
+  app: aws-load-balancer-controller

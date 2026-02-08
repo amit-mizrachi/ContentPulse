@@ -1,0 +1,91 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Values.service.name }}
+  labels:
+    {{- include "llm-judge-service.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "llm-judge-service.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    {{- if .Values.networkPolicy.ingress }}
+    {{- range .Values.networkPolicy.ingress }}
+    - {{- if or .podSelector .namespaceSelector }}
+      from:
+        {{- if .podSelector }}
+        - podSelector:
+            matchLabels:
+              {{- toYaml .podSelector | nindent 14 }}
+        {{- end }}
+        {{- if .namespaceSelector }}
+        - namespaceSelector:
+            matchLabels:
+              {{- toYaml .namespaceSelector | nindent 14 }}
+        {{- end }}
+      {{- end }}
+      {{- if .ports }}
+      ports:
+        {{- range .ports }}
+        - protocol: {{ .protocol | default "TCP" }}
+          port: {{ .port }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+    {{- else }}
+    # Default: allow from same namespace
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.service.containerPort }}
+    {{- end }}
+  egress:
+    {{- if .Values.networkPolicy.egress }}
+    {{- range .Values.networkPolicy.egress }}
+    - {{- if or .podSelector .namespaceSelector .ipBlock }}
+      to:
+        {{- if .podSelector }}
+        - podSelector:
+            matchLabels:
+              {{- toYaml .podSelector | nindent 14 }}
+        {{- end }}
+        {{- if .namespaceSelector }}
+        - namespaceSelector:
+            matchLabels:
+              {{- toYaml .namespaceSelector | nindent 14 }}
+        {{- end }}
+        {{- if .ipBlock }}
+        - ipBlock:
+            cidr: {{ .ipBlock.cidr }}
+            {{- if .ipBlock.except }}
+            except:
+              {{- toYaml .ipBlock.except | nindent 14 }}
+            {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- if .ports }}
+      ports:
+        {{- range .ports }}
+        - protocol: {{ .protocol | default "TCP" }}
+          port: {{ .port }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+    {{- else }}
+    # Default: allow DNS and HTTPS
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 443
+    # Allow to same namespace
+    - to:
+        - podSelector: {}
+    {{- end }}
+{{- end }}

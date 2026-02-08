@@ -1,0 +1,76 @@
+# ========================================================================
+# PERSISTENCE SERVICE - HELM VALUES
+# ========================================================================
+# Configuration values come from Terraform-managed ConfigMap (infra-config)
+# Deploy: helm install persistence ./charts/llm-judge-service -f releases/persistence-values.yaml
+# ========================================================================
+
+service:
+  name: persistence-service
+  type: ClusterIP
+  containerPort: 8002          # Must match PORT_PERSISTENCE in ConfigMap
+  portKey: PORT_PERSISTENCE    # ConfigMap key for SERVICE_PORT
+
+image:
+  pullPolicy: Always
+
+serviceAccount:
+  create: true
+  name: persistence-service
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+
+# AppConfig bootstrap IDs - set from Terraform outputs
+appConfig:
+  applicationId: ""
+  environmentId: ""
+  profileId: ""
+
+ingress:
+  enabled: false
+
+networkPolicy:
+  enabled: true
+  ingress:
+    - podSelector:
+        matchLabels:
+          app: judge-service
+      ports:
+        - port: 8002
+          protocol: TCP
+  egress:
+    - ports:
+        - port: 53
+          protocol: UDP
+    - ipBlock:
+        cidr: 10.0.0.0/16
+      ports:
+        - port: 3306
+          protocol: TCP
+    - ipBlock:
+        cidr: 0.0.0.0/0
+      ports:
+        - port: 443
+          protocol: TCP
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app: persistence-service
+
+nodeSelector:
+  role: application

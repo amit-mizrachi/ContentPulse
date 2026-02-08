@@ -1,0 +1,34 @@
+# Metrics Server Values
+# Helm chart: metrics-server/metrics-server
+# Docs: https://github.com/kubernetes-sigs/metrics-server
+
+# Resource configuration
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+# Replica count
+replicas: 1  # 2 for production
+
+# Args
+args:
+  - --kubelet-preferred-address-types=InternalIP
+  - --kubelet-insecure-tls  # Required for EKS
+
+# Pod labels
+podLabels:
+  app: metrics-server
+
+# Security context
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+      - ALL

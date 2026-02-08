@@ -1,0 +1,2 @@
+from src.services.persistence.repositories.base_repository import BaseRepository
+from src.services.persistence.repositories.history_repository import HistoryRepository

@@ -1,0 +1,89 @@
+# ========================================================================
+# REDIS SERVICE - HELM VALUES
+# ========================================================================
+# Configuration values come from Terraform-managed ConfigMap (infra-config)
+# Deploy: helm install redis ./charts/llm-judge-service -f releases/redis-service-values.yaml
+# ========================================================================
+
+service:
+  name: redis-service
+  type: ClusterIP
+  containerPort: 8001      # Must match PORT_REDIS in ConfigMap
+  portKey: PORT_REDIS      # ConfigMap key for SERVICE_PORT
+
+image:
+  pullPolicy: Always
+
+serviceAccount:
+  create: true
+  name: redis-service
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+
+# AppConfig bootstrap IDs - set from Terraform outputs
+appConfig:
+  applicationId: ""
+  environmentId: ""
+  profileId: ""
+
+ingress:
+  enabled: false
+
+networkPolicy:
+  enabled: true
+  ingress:
+    - podSelector:
+        matchLabels:
+          app: gateway-service
+      ports:
+        - port: 8001
+          protocol: TCP
+    - podSelector:
+        matchLabels:
+          app: inference-service
+      ports:
+        - port: 8001
+          protocol: TCP
+    - podSelector:
+        matchLabels:
+          app: judge-service
+      ports:
+        - port: 8001
+          protocol: TCP
+  egress:
+    - ports:
+        - port: 53
+          protocol: UDP
+    - podSelector:
+        matchLabels:
+          app: redis
+      ports:
+        - port: 6379
+          protocol: TCP
+    - ipBlock:
+        cidr: 0.0.0.0/0
+      ports:
+        - port: 443
+          protocol: TCP
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app: redis-service
+
+nodeSelector:
+  role: application

@@ -1,0 +1,124 @@
+{{- $serviceName := .Values.service.name -}}
+{{- $serviceType := .Values.service.type | default "app" -}}
+{{- $imageRepo := .Values.image.repository | default (printf "%s/%s" .Values.infraConfig.ecrRepositoryPrefix $serviceName) -}}
+{{- $imageTag := .Values.image.tag | default .Values.infraConfig.ecrImageTag | default "latest" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $serviceName }}
+  labels:
+    {{- include "llm-judge-service.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "llm-judge-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        # Reloader: Auto-restart pods when ConfigMap changes
+        configmap.reloader.stakater.com/reload: "infra-config,sqs-config"
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "llm-judge-service.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "llm-judge-service.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ $serviceName }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ $imageRepo }}:{{ $imageTag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.containerPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds | default 30 }}
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold | default 3 }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds | default 10 }}
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold | default 3 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            # SERVICE_PORT - mapped from ConfigMap based on service type
+            - name: SERVICE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: infra-config
+                  key: {{ .Values.service.portKey }}
+            # AWS_REGION from ConfigMap
+            - name: AWS_REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: infra-config
+                  key: AWS_REGION
+            # AppConfig bootstrap (set via Helm values from Terraform outputs)
+            {{- if .Values.appConfig }}
+            - name: APPCONFIG_APPLICATION_ID
+              value: {{ .Values.appConfig.applicationId | quote }}
+            - name: APPCONFIG_ENVIRONMENT_ID
+              value: {{ .Values.appConfig.environmentId | quote }}
+            - name: APPCONFIG_PROFILE_ID
+              value: {{ .Values.appConfig.profileId | quote }}
+            {{- end }}
+            # Additional service-specific env vars
+            {{- with .Values.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          envFrom:
+            # Load all infra config as environment variables
+            - configMapRef:
+                name: infra-config
+            # Load SQS config for worker services
+            {{- if .Values.sqsWorker }}
+            - configMapRef:
+                name: sqs-config
+            {{- end }}
+            # Load DB credentials from ExternalSecret-created Secret
+            {{- if .Values.externalSecret.enabled }}
+            - secretRef:
+                name: {{ .Values.service.name }}-db-credentials
+            {{- end }}
+            {{- with .Values.envFrom }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
