@@ -5,23 +5,22 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from src.interfaces.llm_provider import InferenceOutput
+from src.objects.inference.inference_output import InferenceOutput
 from src.objects.enums.request_stage import RequestStage
 from src.services.query_engine.query_engine_orchestrator import QueryEngineOrchestrator
 
 
 class TestQueryEngineOrchestrator:
     @pytest.fixture
-    def orchestrator(self, mock_state_repository, mock_content_repository, mock_llm_factory):
+    def orchestrator(self, mock_state_repository, mock_content_repository, mock_llm_provider):
         return QueryEngineOrchestrator(
             state_repository=mock_state_repository,
             content_repository=mock_content_repository,
-            llm_factory=mock_llm_factory,
-            query_model="Gemini-Flash",
-            api_key="test-key",
+            llm_provider=mock_llm_provider,
+            model="gemini-2.0-flash",
         )
 
-    def test_handle_success(self, orchestrator, mock_state_repository, mock_content_repository, mock_llm_factory, sample_query_request):
+    def test_handle_success(self, orchestrator, mock_state_repository, mock_content_repository, mock_llm_provider, sample_query_request):
         # Setup: intent parsing response
         intent_response = json.dumps({
             "entities": ["manchester_united"],
@@ -32,8 +31,7 @@ class TestQueryEngineOrchestrator:
         # Setup: synthesis response
         synthesis_response = "Manchester United have made several transfer moves recently."
 
-        mock_provider = mock_llm_factory.create_provider.return_value
-        mock_provider.generate.side_effect = [
+        mock_llm_provider.run_inference.side_effect = [
             InferenceOutput(response=intent_response, model="gemini-2.0-flash",
                           prompt_tokens=50, completion_tokens=30, total_tokens=80, latency_ms=300),
             InferenceOutput(response=synthesis_response, model="gemini-2.0-flash",
@@ -69,9 +67,8 @@ class TestQueryEngineOrchestrator:
         assert final_update["stage"] == "Completed"
         assert "query_result" in final_update
 
-    def test_handle_failure_updates_state(self, orchestrator, mock_state_repository, mock_llm_factory, sample_query_request):
-        mock_provider = mock_llm_factory.create_provider.return_value
-        mock_provider.generate.side_effect = Exception("LLM unavailable")
+    def test_handle_failure_updates_state(self, orchestrator, mock_state_repository, mock_llm_provider, sample_query_request):
+        mock_llm_provider.run_inference.side_effect = Exception("LLM unavailable")
 
         message_data = {
             "request_id": "query-2",
@@ -88,7 +85,7 @@ class TestQueryEngineOrchestrator:
         assert failed_update["stage"] == "Failed"
         assert "error_message" in failed_update
 
-    def test_handle_no_articles_returns_fallback(self, orchestrator, mock_content_repository, mock_llm_factory, sample_query_request):
+    def test_handle_no_articles_returns_fallback(self, orchestrator, mock_content_repository, mock_llm_provider, sample_query_request):
         intent_response = json.dumps({
             "entities": ["obscure_team"],
             "categories": [],
@@ -96,8 +93,7 @@ class TestQueryEngineOrchestrator:
             "search_terms": "obscure team news",
         })
 
-        mock_provider = mock_llm_factory.create_provider.return_value
-        mock_provider.generate.side_effect = [
+        mock_llm_provider.run_inference.side_effect = [
             InferenceOutput(response=intent_response, model="gemini-2.0-flash",
                           prompt_tokens=50, completion_tokens=30, total_tokens=80, latency_ms=300),
         ]

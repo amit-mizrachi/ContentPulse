@@ -4,8 +4,9 @@ import time
 from datetime import datetime, timezone
 
 from src.interfaces.content_repository import ContentRepository
-from src.interfaces.llm_provider import LLMProviderFactory, InferenceConfig
+from src.interfaces.llm_provider import LLMProvider
 from src.interfaces.message_handler import MessageHandler
+from src.objects.inference.inference_config import InferenceConfig
 from src.objects.content.processed_article import ProcessedArticle, Entity
 from src.objects.messages.content_message import ContentMessage
 from src.utils.observability.logs.logger import Logger
@@ -28,15 +29,13 @@ class ContentProcessorOrchestrator(MessageHandler):
     def __init__(
         self,
         content_repository: ContentRepository,
-        llm_factory: LLMProviderFactory,
-        processing_model: str,
-        api_key: str,
+        llm_provider: LLMProvider,
+        model: str,
     ):
         self._logger = Logger()
         self._content_repository = content_repository
-        self._llm_factory = llm_factory
-        self._processing_model = processing_model
-        self._api_key = api_key
+        self._llm_provider = llm_provider
+        self._model = model
 
     def handle(self, raw_message, *args, **kwargs) -> bool:
         try:
@@ -53,12 +52,9 @@ class ContentProcessorOrchestrator(MessageHandler):
         try:
             start_time = time.time()
 
-            provider = self._llm_factory.create_provider(self._processing_model, self._api_key)
-            model_name = self._llm_factory.resolve_model_name(self._processing_model)
-
             prompt = PROCESSING_PROMPT.format(title=raw.title, content=raw.content[:3000])
-            config = InferenceConfig(model=model_name, temperature=0.3)
-            output = provider.generate(prompt=prompt, config=config)
+            config = InferenceConfig(model=self._model, temperature=0.3)
+            output = self._llm_provider.run_inference(prompt=prompt, config=config)
 
             enrichment = json.loads(output.response)
 
@@ -84,7 +80,7 @@ class ContentProcessorOrchestrator(MessageHandler):
                 published_at=raw.published_at,
                 ingested_at=datetime.now(tz=timezone.utc),
                 processed_at=datetime.now(tz=timezone.utc),
-                processing_model=model_name,
+                processing_model=self._model,
                 metadata=raw.metadata,
             )
 

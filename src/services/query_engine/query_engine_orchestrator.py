@@ -4,8 +4,9 @@ import time
 from datetime import datetime, timezone
 
 from src.interfaces.content_repository import ContentRepository
-from src.interfaces.llm_provider import LLMProviderFactory, InferenceConfig
+from src.interfaces.llm_provider import LLMProvider
 from src.interfaces.message_handler import MessageHandler
+from src.objects.inference.inference_config import InferenceConfig
 from src.interfaces.state_repository import StateRepository
 from src.objects.enums.request_stage import RequestStage
 from src.objects.messages.query_message import QueryMessage
@@ -40,16 +41,14 @@ class QueryEngineOrchestrator(MessageHandler):
         self,
         state_repository: StateRepository,
         content_repository: ContentRepository,
-        llm_factory: LLMProviderFactory,
-        query_model: str,
-        api_key: str,
+        llm_provider: LLMProvider,
+        model: str,
     ):
         self._logger = Logger()
         self._state_repository = state_repository
         self._content_repository = content_repository
-        self._llm_factory = llm_factory
-        self._query_model = query_model
-        self._api_key = api_key
+        self._llm_provider = llm_provider
+        self._model = model
 
     def handle(self, raw_message, *args, **kwargs) -> bool:
         query_message = QueryMessage.model_validate(raw_message)
@@ -62,17 +61,14 @@ class QueryEngineOrchestrator(MessageHandler):
         try:
             self._update_stage(request_id, RequestStage.QueryProcessing)
 
-            provider = self._llm_factory.create_provider(self._query_model, self._api_key)
-            model_name = self._llm_factory.resolve_model_name(self._query_model)
-
             # Step 1: Parse intent
-            intent = self._parse_intent(provider, model_name, message.query_request.query)
+            intent = self._parse_intent(message.query_request.query)
 
             # Step 2: Retrieve articles
             articles = self._retrieve_articles(intent, message)
 
             # Step 3: Synthesize answer
-            answer = self._synthesize_answer(provider, model_name, message.query_request.query, articles)
+            answer = self._synthesize_answer(message.query_request.query, articles)
 
             # Build source references
             sources = [
@@ -90,7 +86,7 @@ class QueryEngineOrchestrator(MessageHandler):
                 answer=answer,
                 sources=sources,
                 metadata={"intent": intent},
-                model=model_name,
+                model=self._model,
                 latency_ms=latency_ms,
             )
 
@@ -106,10 +102,10 @@ class QueryEngineOrchestrator(MessageHandler):
             self._handle_failure(request_id, e)
             return False
 
-    def _parse_intent(self, provider, model_name: str, query: str) -> dict:
+    def _parse_intent(self, query: str) -> dict:
         prompt = INTENT_PROMPT.format(query=query)
-        config = InferenceConfig(model=model_name, temperature=0.2)
-        output = provider.generate(prompt=prompt, config=config)
+        config = InferenceConfig(model=self._model, temperature=0.2)
+        output = self._llm_provider.run_inference(prompt=prompt, config=config)
         return json.loads(output.response)
 
     def _retrieve_articles(self, intent: dict, message: QueryMessage) -> list:
@@ -141,7 +137,7 @@ class QueryEngineOrchestrator(MessageHandler):
 
         return articles
 
-    def _synthesize_answer(self, provider, model_name: str, query: str, articles: list) -> str:
+    def _synthesize_answer(self, query: str, articles: list) -> str:
         if not articles:
             return "I couldn't find any relevant articles to answer your question."
 
@@ -151,8 +147,8 @@ class QueryEngineOrchestrator(MessageHandler):
         )
 
         prompt = SYNTHESIS_PROMPT.format(query=query, articles=articles_text)
-        config = InferenceConfig(model=model_name, temperature=0.5)
-        output = provider.generate(prompt=prompt, config=config)
+        config = InferenceConfig(model=self._model, temperature=0.5)
+        output = self._llm_provider.run_inference(prompt=prompt, config=config)
         return output.response
 
     def _update_stage(self, request_id: str, stage: RequestStage):

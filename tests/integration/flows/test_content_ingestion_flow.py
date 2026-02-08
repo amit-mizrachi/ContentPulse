@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.interfaces.llm_provider import InferenceOutput
+from src.objects.inference.inference_output import InferenceOutput
 from src.objects.content.raw_content import RawContent
 from src.objects.messages.content_message import ContentMessage
 from src.services.content_processor.content_processor_orchestrator import ContentProcessorOrchestrator
@@ -13,7 +13,7 @@ from src.services.content_processor.content_processor_orchestrator import Conten
 
 class TestContentIngestionFlow:
     def test_content_message_to_stored_article(
-        self, mock_content_repository, mock_llm_factory, sample_raw_content,
+        self, mock_content_repository, mock_llm_provider, sample_raw_content,
     ):
         """Test: raw content message → LLM enrichment → stored article."""
         # Simulate what the poller would publish
@@ -32,8 +32,7 @@ class TestContentIngestionFlow:
             "categories": ["football", "premier_league", "transfer"],
             "sentiment": "positive",
         })
-        mock_provider = mock_llm_factory.create_provider.return_value
-        mock_provider.generate.return_value = InferenceOutput(
+        mock_llm_provider.run_inference.return_value = InferenceOutput(
             response=llm_response, model="gemini-2.0-flash",
             prompt_tokens=100, completion_tokens=50, total_tokens=150, latency_ms=400,
         )
@@ -41,9 +40,8 @@ class TestContentIngestionFlow:
         # Process
         processor = ContentProcessorOrchestrator(
             content_repository=mock_content_repository,
-            llm_factory=mock_llm_factory,
-            processing_model="Gemini-Flash",
-            api_key="test-key",
+            llm_provider=mock_llm_provider,
+            model="gemini-2.0-flash",
         )
         result = processor.handle(message_data)
         assert result is True

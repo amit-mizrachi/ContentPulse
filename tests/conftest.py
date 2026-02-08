@@ -5,7 +5,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.interfaces.content_repository import ContentRepository
-from src.interfaces.llm_provider import LLMProviderFactory, LLMProvider, InferenceConfig, InferenceOutput
+from src.interfaces.llm_provider import LLMProvider
+from src.objects.inference.inference_config import InferenceConfig
+from src.objects.inference.inference_output import InferenceOutput
 from src.interfaces.message_publisher import MessagePublisher
 from src.interfaces.state_repository import StateRepository
 from src.objects.content.raw_content import RawContent
@@ -120,9 +122,9 @@ def mock_message_publisher():
 
 
 @pytest.fixture
-def mock_llm_factory():
+def mock_llm_provider():
     mock_provider = MagicMock(spec=LLMProvider)
-    mock_provider.generate.return_value = InferenceOutput(
+    mock_provider.run_inference.return_value = InferenceOutput(
         response='{"summary": "Test summary", "entities": [], "categories": ["test"], "sentiment": "neutral"}',
         model="gemini-2.0-flash",
         prompt_tokens=100,
@@ -131,8 +133,4 @@ def mock_llm_factory():
         latency_ms=500.0,
     )
     mock_provider.is_healthy.return_value = True
-
-    mock_factory = MagicMock(spec=LLMProviderFactory)
-    mock_factory.create_provider.return_value = mock_provider
-    mock_factory.resolve_model_name.return_value = "gemini-2.0-flash"
-    return mock_factory
+    return mock_provider

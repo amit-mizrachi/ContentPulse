@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.interfaces.llm_provider import InferenceOutput
+from src.objects.inference.inference_output import InferenceOutput
 from src.objects.requests.processed_request import ProcessedQuery
 from src.objects.enums.request_stage import RequestStage
 from src.objects.enums.request_status import RequestStatus
@@ -17,7 +17,7 @@ from src.services.query_engine.query_engine_orchestrator import QueryEngineOrche
 class TestQueryFlow:
     def test_end_to_end_query_flow(
         self, mock_state_repository, mock_content_repository,
-        mock_message_publisher, mock_llm_factory, sample_query_request,
+        mock_message_publisher, mock_llm_provider, sample_query_request,
     ):
         """Test: submit query at gateway → process in query engine → result stored in state."""
         # Phase 1: Submit query via gateway
@@ -43,8 +43,7 @@ class TestQueryFlow:
         })
         synthesis_response = "Manchester United have been active in the transfer window."
 
-        mock_provider = mock_llm_factory.create_provider.return_value
-        mock_provider.generate.side_effect = [
+        mock_llm_provider.run_inference.side_effect = [
             InferenceOutput(response=intent_response, model="gemini-2.0-flash",
                           prompt_tokens=50, completion_tokens=30, total_tokens=80, latency_ms=200),
             InferenceOutput(response=synthesis_response, model="gemini-2.0-flash",
@@ -59,9 +58,8 @@ class TestQueryFlow:
         engine = QueryEngineOrchestrator(
             state_repository=mock_state_repository,
             content_repository=mock_content_repository,
-            llm_factory=mock_llm_factory,
-            query_model="Gemini-Flash",
-            api_key="test-key",
+            llm_provider=mock_llm_provider,
+            model="gemini-2.0-flash",
         )
         result = engine.handle(published_message)
         assert result is True

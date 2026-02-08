@@ -11,7 +11,7 @@ from src.utils.services.clients.mongodb_client import get_content_repository
 from src.utils.services.clients.redis_client import get_state_repository
 from src.utils.services.config.health import start_health_server_background
 from src.utils.services.config.ports import get_service_port
-from src.utils.services.llm.llm_provider_factory import DefaultLLMProviderFactory
+from src.utils.services.inference.provider_config_builder import build_provider_config
 
 logger = Logger()
 
@@ -21,12 +21,12 @@ DEFAULT_PORT = 8004
 
 def create_query_engine_orchestrator() -> QueryEngineOrchestrator:
     config_service = get_config_service()
+    provider_config = build_provider_config(config_service, "query_engine")
     return QueryEngineOrchestrator(
         state_repository=get_state_repository(),
         content_repository=get_content_repository(),
-        llm_factory=DefaultLLMProviderFactory(),
-        query_model=config_service.get("query_engine.model", "Gemini-Flash"),
-        api_key=config_service.get("query_engine.api_key", ""),
+        llm_provider=provider_config.create_provider(),
+        model=provider_config.model,
     )
 
 

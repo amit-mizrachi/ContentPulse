@@ -10,7 +10,7 @@ from src.utils.services.aws.appconfig_service import get_config_service
 from src.utils.services.clients.mongodb_client import get_content_repository
 from src.utils.services.config.health import start_health_server_background
 from src.utils.services.config.ports import get_service_port
-from src.utils.services.llm.llm_provider_factory import DefaultLLMProviderFactory
+from src.utils.services.inference.provider_config_builder import build_provider_config
 
 logger = Logger()
 
@@ -20,11 +20,11 @@ DEFAULT_PORT = 8003
 
 def create_content_processor_orchestrator() -> ContentProcessorOrchestrator:
     config_service = get_config_service()
+    provider_config = build_provider_config(config_service, "content_processor")
     return ContentProcessorOrchestrator(
         content_repository=get_content_repository(),
-        llm_factory=DefaultLLMProviderFactory(),
-        processing_model=config_service.get("content_processor.model", "Gemini-Flash"),
-        api_key=config_service.get("content_processor.api_key", ""),
+        llm_provider=provider_config.create_provider(),
+        model=provider_config.model,
     )
 
 

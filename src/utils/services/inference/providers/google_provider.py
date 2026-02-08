@@ -5,17 +5,19 @@ from typing import Optional
 from google import genai
 from google.genai import types
 
-from src.interfaces.llm_provider import LLMProvider, InferenceConfig, InferenceOutput
+from src.interfaces.llm_provider import LLMProvider
+from src.objects.inference.inference_config import InferenceConfig
+from src.objects.inference.inference_output import InferenceOutput
 
 
-class GoogleClient(LLMProvider):
+class GoogleProvider(LLMProvider):
     """Google Gemini LLM provider implementation."""
 
     def __init__(self, api_key: str):
         self._client = genai.Client(api_key=api_key)
         self._api_key = api_key
 
-    def generate(self, prompt: str, config: InferenceConfig) -> InferenceOutput:
+    def run_inference(self, prompt: str, config: InferenceConfig) -> InferenceOutput:
         gen_config = types.GenerateContentConfig(
             max_output_tokens=config.max_tokens or 4096,
             temperature=config.temperature,
@@ -64,4 +66,4 @@ class GoogleClient(LLMProvider):
             max_tokens=max_tokens,
             system_prompt=system_prompt
         )
-        return self.generate(prompt, config)
+        return self.run_inference(prompt, config)

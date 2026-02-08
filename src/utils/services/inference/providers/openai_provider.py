@@ -4,7 +4,9 @@ from typing import Optional
 
 from openai import OpenAI
 
-from src.interfaces.llm_provider import LLMProvider, InferenceConfig, InferenceOutput
+from src.interfaces.llm_provider import LLMProvider
+from src.objects.inference.inference_config import InferenceConfig
+from src.objects.inference.inference_output import InferenceOutput
 
 DEFAULT_MAX_TOKENS = 4096
 DEFAULT_TEMPERATURE = 0.7
@@ -16,14 +18,14 @@ class HealthCheckError(Exception):
     pass
 
 
-class OpenAIClient(LLMProvider):
+class OpenAIProvider(LLMProvider):
     """OpenAI LLM provider implementation."""
 
-    def __init__(self, api_key: str):
-        self._client = OpenAI(api_key=api_key)
+    def __init__(self, api_key: str, base_url: Optional[str] = None):
+        self._client = OpenAI(api_key=api_key, base_url=base_url)
         self._api_key = api_key
 
-    def generate(self, prompt: str, config: InferenceConfig) -> InferenceOutput:
+    def run_inference(self, prompt: str, config: InferenceConfig) -> InferenceOutput:
         messages = []
         if config.system_prompt:
             messages.append({"role": "system", "content": config.system_prompt})
@@ -74,4 +76,4 @@ class OpenAIClient(LLMProvider):
                 temperature=DEFAULT_TEMPERATURE,
                 max_tokens=DEFAULT_MAX_TOKENS
             )
-        return self.generate(prompt, config)
+        return self.run_inference(prompt, config)
