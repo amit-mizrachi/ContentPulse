@@ -4,17 +4,17 @@ from datetime import datetime, timezone
 
 import pytest
 
-from src.objects.content.raw_article import RawArticle
-from src.objects.content.article_entity import ArticleEntity
-from src.objects.content.processed_article import ProcessedArticle
-from src.objects.requests.processed_request import ProcessedQuery
-from src.objects.enums.request_stage import RequestStage
-from src.objects.messages.content_message import ContentMessage
-from src.objects.messages.query_message import QueryMessage
-from src.objects.requests.query_filters import QueryFilters
-from src.objects.requests.query_request import QueryRequest
-from src.objects.results.query_result import QueryResult
-from src.objects.results.source_reference import SourceReference
+from src.shared.objects.content.raw_article import RawArticle
+from src.shared.objects.content.article_entity import ArticleEntity
+from src.shared.objects.content.processed_article import ProcessedArticle
+from src.shared.objects.requests.processed_request import ProcessedQuery
+from src.shared.objects.enums.request_stage import RequestStage
+from src.shared.objects.messages.content_message import ContentMessage
+from src.shared.objects.messages.query_message import QueryMessage
+from src.shared.objects.requests.query_filters import QueryFilters
+from src.shared.objects.requests.query_request import QueryRequest
+from src.shared.objects.results.query_result import QueryResult
+from src.shared.objects.results.source_reference import SourceReference
 
 
 class TestModelSerializationRoundTrips:

@@ -1,17 +1,17 @@
 """Query Submission Service - handles query submission and status retrieval."""
 import uuid
 
-from src.interfaces.message_publisher import MessagePublisher
-from src.interfaces.state_repository import StateRepository
-from src.objects.enums.request_stage import RequestStage
-from src.objects.enums.request_status import RequestStatus
-from src.objects.requests.processed_request import ProcessedQuery
-from src.objects.messages.query_message import QueryMessage
-from src.objects.requests.query_request import QueryRequest
-from src.objects.responses.query_response import QueryResponse
-from src.utils.observability.logs.logger import Logger
-from src.utils.observability.traces.spans.span_context_factory import SpanContextFactory
-from src.utils.observability.traces.spans.spanner import Spanner
+from src.shared.interfaces.message_publisher import MessagePublisher
+from src.shared.interfaces.state_repository import StateRepository
+from src.shared.objects.enums.request_stage import RequestStage
+from src.shared.objects.enums.request_status import RequestStatus
+from src.shared.objects.requests.processed_request import ProcessedQuery
+from src.shared.objects.messages.query_message import QueryMessage
+from src.shared.objects.requests.query_request import QueryRequest
+from src.shared.objects.responses.query_response import QueryResponse
+from src.shared.observability.logs.logger import Logger
+from src.shared.observability.traces.spans.span_context_factory import SpanContextFactory
+from src.shared.observability.traces.spans.spanner import Spanner
 
 
 class QuerySubmissionService:

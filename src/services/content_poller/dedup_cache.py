@@ -1,8 +1,8 @@
 """Redis Set-based deduplication cache for fast article existence checks."""
 import redis
 
-from src.utils.services.aws.appconfig_service import get_config_service
-from src.utils.observability.logs.logger import Logger
+from src.shared.aws.appconfig_service import get_config_service
+from src.shared.observability.logs.logger import Logger
 
 
 class DeduplicationCache:

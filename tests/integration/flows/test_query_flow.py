@@ -5,11 +5,11 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.objects.inference.inference_result import InferenceResult
-from src.objects.requests.processed_request import ProcessedQuery
-from src.objects.enums.request_stage import RequestStage
-from src.objects.enums.request_status import RequestStatus
-from src.objects.requests.query_request import QueryRequest
+from src.shared.objects.inference.inference_result import InferenceResult
+from src.shared.objects.requests.processed_request import ProcessedQuery
+from src.shared.objects.enums.request_stage import RequestStage
+from src.shared.objects.enums.request_status import RequestStatus
+from src.shared.objects.requests.query_request import QueryRequest
 from src.services.gateway.query_submission_service import QuerySubmissionService
 from src.services.query_engine.query_engine_orchestrator import QueryEngineOrchestrator
 

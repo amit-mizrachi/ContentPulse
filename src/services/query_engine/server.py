@@ -3,16 +3,16 @@ import asyncio
 import signal
 
 from src.services.query_engine.query_engine_orchestrator import QueryEngineOrchestrator
-from src.utils.observability.logs.logger import Logger
-from src.utils.observability.traces.tracer import Tracer
-from src.utils.queue.messaging_factory import get_message_consumer
-from src.utils.queue.thread_pool_message_dispatcher import ThreadPoolMessageDispatcher
-from src.utils.services.aws.appconfig_service import get_config_service
-from src.utils.services.clients.mongodb_client import get_content_repository
-from src.utils.services.clients.redis_client import get_state_repository
-from src.utils.services.config.health import start_health_server_background
-from src.utils.services.config.ports import get_service_port
-from src.utils.services.inference.provider_config_builder import build_provider_config
+from src.shared.observability.logs.logger import Logger
+from src.shared.observability.traces.tracer import Tracer
+from src.shared.messaging.messaging_factory import get_message_consumer
+from src.shared.messaging.thread_pool_message_dispatcher import ThreadPoolMessageDispatcher
+from src.shared.aws.appconfig_service import get_config_service
+from src.shared.storage.mongodb_client import get_content_repository
+from src.shared.storage.redis_client import get_state_repository
+from src.shared.config.health import start_health_server_background
+from src.shared.config.ports import get_service_port
+from src.shared.inference.provider_config_builder import build_provider_config
 
 logger = Logger()
 tracer = Tracer()

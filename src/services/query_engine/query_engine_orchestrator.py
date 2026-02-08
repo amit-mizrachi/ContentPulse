@@ -3,17 +3,17 @@ import json
 import time
 from datetime import datetime, timezone
 
-from src.interfaces.article_store import ArticleStore
-from src.interfaces.llm_provider import LLMProvider
-from src.interfaces.message_handler import MessageHandler
-from src.objects.inference.inference_config import InferenceConfig
-from src.interfaces.state_repository import StateRepository
-from src.objects.enums.request_stage import RequestStage
-from src.objects.messages.query_message import QueryMessage
-from src.objects.results.query_result import QueryResult
-from src.objects.results.source_reference import SourceReference
-from src.utils.observability.logs.logger import Logger
-from src.utils.observability.traces.spans.span_context_factory import SpanContextFactory
+from src.shared.interfaces.article_store import ArticleStore
+from src.shared.interfaces.llm_provider import LLMProvider
+from src.shared.interfaces.message_handler import MessageHandler
+from src.shared.objects.inference.inference_config import InferenceConfig
+from src.shared.interfaces.state_repository import StateRepository
+from src.shared.objects.enums.request_stage import RequestStage
+from src.shared.objects.messages.query_message import QueryMessage
+from src.shared.objects.results.query_result import QueryResult
+from src.shared.objects.results.source_reference import SourceReference
+from src.shared.observability.logs.logger import Logger
+from src.shared.observability.traces.spans.span_context_factory import SpanContextFactory
 
 INTENT_PROMPT = """Parse this sports query and return a JSON object with:
 - "entities": Array of normalized entity strings to search (e.g. ["manchester_united", "cristiano_ronaldo"])

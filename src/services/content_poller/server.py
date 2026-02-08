@@ -6,13 +6,13 @@ from src.services.content_poller.dedup_cache import DeduplicationCache
 from src.services.content_poller.poller import ContentPoller
 from src.services.content_poller.sources.reddit_source import RedditSource
 from src.services.content_poller.sources.rss_source import RSSSource
-from src.utils.observability.logs.logger import Logger
-from src.utils.observability.traces.tracer import Tracer
-from src.utils.queue.messaging_factory import get_message_publisher
-from src.utils.services.aws.appconfig_service import get_config_service
-from src.utils.services.clients.mongodb_client import get_content_repository
-from src.utils.services.config.health import start_health_server_background
-from src.utils.services.config.ports import get_service_port
+from src.shared.observability.logs.logger import Logger
+from src.shared.observability.traces.tracer import Tracer
+from src.shared.messaging.messaging_factory import get_message_publisher
+from src.shared.aws.appconfig_service import get_config_service
+from src.shared.storage.mongodb_client import get_content_repository
+from src.shared.config.health import start_health_server_background
+from src.shared.config.ports import get_service_port
 
 logger = Logger()
 tracer = Tracer()

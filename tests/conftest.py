@@ -4,19 +4,19 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.interfaces.article_store import ArticleStore
-from src.interfaces.llm_provider import LLMProvider
-from src.objects.inference.inference_config import InferenceConfig
-from src.objects.inference.inference_result import InferenceResult
-from src.interfaces.message_publisher import MessagePublisher
-from src.interfaces.state_repository import StateRepository
-from src.objects.content.raw_article import RawArticle
-from src.objects.content.article_entity import ArticleEntity
-from src.objects.content.processed_article import ProcessedArticle
-from src.objects.requests.query_filters import QueryFilters
-from src.objects.requests.query_request import QueryRequest
-from src.objects.results.query_result import QueryResult
-from src.objects.results.source_reference import SourceReference
+from src.shared.interfaces.article_store import ArticleStore
+from src.shared.interfaces.llm_provider import LLMProvider
+from src.shared.objects.inference.inference_config import InferenceConfig
+from src.shared.objects.inference.inference_result import InferenceResult
+from src.shared.interfaces.message_publisher import MessagePublisher
+from src.shared.interfaces.state_repository import StateRepository
+from src.shared.objects.content.raw_article import RawArticle
+from src.shared.objects.content.article_entity import ArticleEntity
+from src.shared.objects.content.processed_article import ProcessedArticle
+from src.shared.objects.requests.query_filters import QueryFilters
+from src.shared.objects.requests.query_request import QueryRequest
+from src.shared.objects.results.query_result import QueryResult
+from src.shared.objects.results.source_reference import SourceReference
 
 
 @pytest.fixture(autouse=True)

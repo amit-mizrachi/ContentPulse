@@ -4,8 +4,8 @@ from typing import List, Optional
 
 import praw
 
-from src.interfaces.content_source import ContentSource
-from src.objects.content.raw_article import RawArticle
+from src.shared.interfaces.content_source import ContentSource
+from src.shared.objects.content.raw_article import RawArticle
 
 
 class RedditSource(ContentSource):

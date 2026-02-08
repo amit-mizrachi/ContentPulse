@@ -3,15 +3,15 @@ import json
 import time
 from datetime import datetime, timezone
 
-from src.interfaces.article_store import ArticleStore
-from src.interfaces.llm_provider import LLMProvider
-from src.interfaces.message_handler import MessageHandler
-from src.objects.inference.inference_config import InferenceConfig
-from src.objects.content.article_entity import ArticleEntity
-from src.objects.content.processed_article import ProcessedArticle
-from src.objects.messages.content_message import ContentMessage
-from src.utils.observability.logs.logger import Logger
-from src.utils.observability.traces.spans.span_context_factory import SpanContextFactory
+from src.shared.interfaces.article_store import ArticleStore
+from src.shared.interfaces.llm_provider import LLMProvider
+from src.shared.interfaces.message_handler import MessageHandler
+from src.shared.objects.inference.inference_config import InferenceConfig
+from src.shared.objects.content.article_entity import ArticleEntity
+from src.shared.objects.content.processed_article import ProcessedArticle
+from src.shared.objects.messages.content_message import ContentMessage
+from src.shared.observability.logs.logger import Logger
+from src.shared.observability.traces.spans.span_context_factory import SpanContextFactory
 
 PROCESSING_PROMPT = """Analyze this sports article and return a JSON object with:
 - "summary": A 2-3 sentence summary

@@ -5,9 +5,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.objects.inference.inference_result import InferenceResult
-from src.objects.content.raw_article import RawArticle
-from src.objects.messages.content_message import ContentMessage
+from src.shared.objects.inference.inference_result import InferenceResult
+from src.shared.objects.content.raw_article import RawArticle
+from src.shared.objects.messages.content_message import ContentMessage
 from src.services.content_processor.content_processor_orchestrator import ContentProcessorOrchestrator
 
 

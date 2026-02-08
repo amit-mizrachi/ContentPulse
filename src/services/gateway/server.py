@@ -3,14 +3,14 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, Request
 
 from src.services.gateway.query_submission_service import QuerySubmissionService
-from src.objects.requests.query_request import QueryRequest
-from src.utils.observability.logs.logger import Logger
-from src.utils.observability.traces.spans.span_context_factory import SpanContextFactory
-from src.utils.observability.traces.spans.spanner import Spanner
-from src.utils.queue.messaging_factory import get_message_publisher
-from src.utils.services.aws.appconfig_service import get_config_service
-from src.utils.services.clients.redis_client import get_state_repository
-from src.utils.services.config.ports import get_service_port
+from src.shared.objects.requests.query_request import QueryRequest
+from src.shared.observability.logs.logger import Logger
+from src.shared.observability.traces.spans.span_context_factory import SpanContextFactory
+from src.shared.observability.traces.spans.spanner import Spanner
+from src.shared.messaging.messaging_factory import get_message_publisher
+from src.shared.aws.appconfig_service import get_config_service
+from src.shared.storage.redis_client import get_state_repository
+from src.shared.config.ports import get_service_port
 
 app = FastAPI(title="ContentPulse Gateway")
 logger = Logger()

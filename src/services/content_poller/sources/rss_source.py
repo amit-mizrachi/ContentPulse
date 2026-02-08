@@ -5,8 +5,8 @@ from hashlib import sha256
 
 import feedparser
 
-from src.interfaces.content_source import ContentSource
-from src.objects.content.raw_article import RawArticle
+from src.shared.interfaces.content_source import ContentSource
+from src.shared.objects.content.raw_article import RawArticle
 
 
 class RSSSource(ContentSource):
