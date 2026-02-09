@@ -85,6 +85,10 @@ resource "helm_release" "content_processor_service_release" {
 
       inferenceMode = try(var.inference_config.content_processor.inference_mode, "remote")
 
+      env = [
+        { name = "SERVICE_NAME", value = var.service_names.content_processor }
+      ]
+
       envFrom = [{ configMapRef = { name = kubernetes_config_map.infra_config.metadata[0].name } }]
     })
   ]

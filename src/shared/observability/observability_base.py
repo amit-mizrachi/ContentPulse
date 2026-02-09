@@ -14,7 +14,7 @@ class ObservabilityBase(metaclass=Singleton):
 
     def __init__(self):
         self._appconfig_service = get_config_service()
-        self._service_name = os.getcwd().split(os.sep)[-1]
+        self._service_name = os.environ.get("SERVICE_NAME") or os.getcwd().split(os.sep)[-1]
 
     def get_current_span(self):
         current_span = opentelemetry.trace.get_current_span()

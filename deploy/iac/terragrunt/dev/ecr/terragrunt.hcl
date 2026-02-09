@@ -13,6 +13,7 @@ inputs = {
   environment      = include.root.inputs.environment
   project_name     = include.root.inputs.project_name
   repository_names = [
+    "base",
     "gateway-service",
     "content-poller-service",
     "inference-service"

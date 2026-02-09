@@ -51,6 +51,10 @@ resource "helm_release" "gateway_service_release" {
         targetCPUUtilizationPercentage = var.autoscaling.cpu_target_percent
       }
 
+      env = [
+        { name = "SERVICE_NAME", value = var.service_names.gateway }
+      ]
+
       envFrom = [
         {
           configMapRef = {

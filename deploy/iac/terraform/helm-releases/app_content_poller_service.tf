@@ -45,6 +45,10 @@ resource "helm_release" "content_poller_service_release" {
         targetCPUUtilizationPercentage = var.autoscaling.cpu_target_percent
       }
 
+      env = [
+        { name = "SERVICE_NAME", value = var.service_names.content_poller }
+      ]
+
       envFrom = [{ configMapRef = { name = kubernetes_config_map.infra_config.metadata[0].name } }]
     })
   ]

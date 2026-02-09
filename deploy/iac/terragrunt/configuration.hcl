@@ -650,6 +650,7 @@ locals {
     repository_prefix = "${local.aws_account_id}.dkr.ecr.${local.aws_region}.amazonaws.com"
     image_tag         = "v1.0.0"
     repositories = {
+      base              = "${local.aws_account_id}.dkr.ecr.${local.aws_region}.amazonaws.com/${local.project_name}/base"
       gateway           = "${local.aws_account_id}.dkr.ecr.${local.aws_region}.amazonaws.com/${local.service_names.gateway}"
       content_poller    = "${local.aws_account_id}.dkr.ecr.${local.aws_region}.amazonaws.com/${local.service_names.content_poller}"
       inference         = "${local.aws_account_id}.dkr.ecr.${local.aws_region}.amazonaws.com/inference-service"

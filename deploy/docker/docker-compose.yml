@@ -56,14 +56,14 @@ services:
   # Base image build (other services depend on this)
   base-image:
     build:
-      context: ..
+      context: ../..
       dockerfile: deploy/docker/Dockerfile.base
     image: contentpulse-base:latest
 
   # Application Services
   gateway-service:
     build:
-      context: ..
+      context: ../..
       dockerfile: src/services/gateway/Dockerfile
     ports:
       - "${PORT_GATEWAY:-8000}:${PORT_GATEWAY:-8000}"
@@ -88,7 +88,7 @@ services:
 
   content-processor-service:
     build:
-      context: ..
+      context: ../..
       dockerfile: src/services/content_processor/Dockerfile
     ports:
       - "${PORT_CONTENT_PROCESSOR:-8003}:${PORT_CONTENT_PROCESSOR:-8003}"
@@ -115,7 +115,7 @@ services:
 
   query-engine-service:
     build:
-      context: ..
+      context: ../..
       dockerfile: src/services/query_engine/Dockerfile
     ports:
       - "${PORT_QUERY_ENGINE:-8004}:${PORT_QUERY_ENGINE:-8004}"
@@ -142,7 +142,7 @@ services:
 
   content-poller-service:
     build:
-      context: ..
+      context: ../..
       dockerfile: src/services/content_poller/Dockerfile
     ports:
       - "${PORT_CONTENT_POLLER:-8005}:${PORT_CONTENT_POLLER:-8005}"

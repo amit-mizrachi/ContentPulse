@@ -20,7 +20,7 @@ class Logger(ObservabilityBase):
 
     def _configure_logger(self):
         try:
-            self._setup_file_handler()
+            # self._setup_file_handler() TODO: Currently not needed in EKS setup, remove later after we verify thats the case.
             self._setup_stdout_handler()
 
             min_level = self._appconfig_service.get("observability.logs.minimum_logging_levels.logger")
@@ -30,14 +30,20 @@ class Logger(ObservabilityBase):
             print(traceback.format_exc(), file=sys.stderr)
 
     def _setup_file_handler(self):
-        base_path = self._appconfig_service.get("observability.logs.files.path")
-        capacity = int(self._appconfig_service.get("observability.logs.files.buffer_capacity"))
-        min_level = self._appconfig_service.get("observability.logs.minimum_logging_levels.files_handler")
+        try:
+            base_path = self._appconfig_service.get("observability.logs.files.path")
+            if not base_path:
+                return
 
-        path = f"{base_path}/{self._service_name}.log"
-        handler = BufferedFileHandler(path, buffer_capacity=capacity)
-        handler.setLevel(min_level)
-        self._logger.addHandler(handler)
+            capacity = int(self._appconfig_service.get("observability.logs.files.buffer_capacity"))
+            min_level = self._appconfig_service.get("observability.logs.minimum_logging_levels.files_handler")
+
+            path = f"{base_path}/{self._service_name}.log"
+            handler = BufferedFileHandler(path, buffer_capacity=capacity)
+            handler.setLevel(min_level)
+            self._logger.addHandler(handler)
+        except (OSError, PermissionError):
+            print(f"File logging unavailable (read-only filesystem?), using stdout only", file=sys.stderr)
 
     def _setup_stdout_handler(self):
         min_level = self._appconfig_service.get("observability.logs.minimum_logging_levels.stdout_handler")
