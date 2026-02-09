@@ -13,7 +13,7 @@ reloader:
   watchGlobally: true
 
   # Only watch specific namespaces (optional - set to limit scope)
-  # namespaceSelector: "contentpulse"
+  # namespaceSelector: "simple-sport-news"
 
   # Resource limits
   resources:

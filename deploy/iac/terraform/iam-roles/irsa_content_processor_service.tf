@@ -20,7 +20,7 @@ resource "aws_iam_role" "content_processor_service_irsa" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
-            "${local.oidc_provider_id}:sub" = "system:serviceaccount:contentpulse:content-processor-service"
+            "${local.oidc_provider_id}:sub" = "system:serviceaccount:simple-sport-news:content-processor-service"
             "${local.oidc_provider_id}:aud" = "sts.amazonaws.com"
           }
         }
@@ -31,7 +31,7 @@ resource "aws_iam_role" "content_processor_service_irsa" {
   tags = merge(local.iam_tags, {
     Name      = "${var.environment}-content-processor-service-irsa-role"
     Service   = "content-processor-service"
-    Namespace = "contentpulse"
+    Namespace = "simple-sport-news"
   })
 }
 
@@ -39,7 +39,7 @@ resource "aws_iam_policy" "content_processor_service_policy" {
   count = local.create_irsa ? 1 : 0
 
   name        = "${var.environment}-content-processor-service-policy"
-  description = "IAM policy for content-processor-service in contentpulse namespace"
+  description = "IAM policy for content-processor-service in simple-sport-news namespace"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -68,7 +68,7 @@ resource "aws_iam_policy" "content_processor_service_policy" {
   tags = merge(local.iam_tags, {
     Name      = "${var.environment}-content-processor-service-policy"
     Service   = "content-processor-service"
-    Namespace = "contentpulse"
+    Namespace = "simple-sport-news"
   })
 }
 

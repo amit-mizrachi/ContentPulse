@@ -4,7 +4,7 @@ kind: PodDisruptionBudget
 metadata:
   name: {{ .Values.service.name }}
   labels:
-    {{- include "contentpulse-service.labels" . | nindent 4 }}
+    {{- include "simple-sport-news-service.labels" . | nindent 4 }}
 spec:
   {{- if .Values.podDisruptionBudget.minAvailable }}
   minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
@@ -15,5 +15,5 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "contentpulse-service.selectorLabels" . | nindent 6 }}
+      {{- include "simple-sport-news-service.selectorLabels" . | nindent 6 }}
 {{- end }}

@@ -16,7 +16,7 @@ class MongoDBClient(ArticleStore):
         config = get_config_service()
         host = config.get("mongodb.host", "mongodb")
         port = int(config.get("mongodb.port", 27017))
-        database = config.get("mongodb.database", "contentpulse")
+        database = config.get("mongodb.database", "simple-sport-news")
 
         self._client = MongoClient(host=host, port=port)
         self._db = self._client[database]

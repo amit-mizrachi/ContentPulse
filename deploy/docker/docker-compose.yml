@@ -1,7 +1,7 @@
 version: '3.8'
 
 # ========================================================================
-# CONTENTPULSE DOCKER COMPOSE
+# SIMPLE_SPORT_NEWS DOCKER COMPOSE
 # ========================================================================
 # Configuration values from .env file (copy from .env.example)
 # ========================================================================
@@ -58,7 +58,7 @@ services:
     build:
       context: ../..
       dockerfile: deploy/docker/Dockerfile.base
-    image: contentpulse-base:latest
+    image: simple-sport-news-base:latest
 
   # Application Services
   gateway-service:

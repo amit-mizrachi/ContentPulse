@@ -1,12 +1,12 @@
 # ========================================================================
 # APPLICATION - GATEWAY SERVICE
-# API Gateway / Entry point for the ContentPulse platform
+# API Gateway / Entry point for the simple_sport_news platform
 # ========================================================================
 
 resource "helm_release" "gateway_service_release" {
   name      = "gateway-service"
-  chart     = local.contentpulse_chart_path
-  namespace = kubernetes_namespace.contentpulse_namespace.metadata[0].name
+  chart     = local.simple_sport_news_chart_path
+  namespace = kubernetes_namespace.simple_sport_news_namespace.metadata[0].name
 
   values = [
     yamlencode({
@@ -61,7 +61,7 @@ resource "helm_release" "gateway_service_release" {
           "alb.ingress.kubernetes.io/target-type"      = "ip"
           "alb.ingress.kubernetes.io/healthcheck-path" = "/health"
           "alb.ingress.kubernetes.io/listen-ports"     = "[{\"HTTP\": 80}]"
-          "alb.ingress.kubernetes.io/group.name"       = "contentpulse"
+          "alb.ingress.kubernetes.io/group.name"       = "simple-sport-news"
         }
         hosts = [
           {

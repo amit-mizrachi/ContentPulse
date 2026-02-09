@@ -31,7 +31,7 @@ class KafkaConsumer(AsyncMessageConsumer):
 
         self._consumer = Consumer({
             "bootstrap.servers": self._appconfig.get("kafka.bootstrap_servers"),
-            "group.id": self._appconfig.get("kafka.group_id", "contentpulse"),
+            "group.id": self._appconfig.get("kafka.group_id", "simple-sport-news"),
             "auto.offset.reset": self._appconfig.get("kafka.auto_offset_reset", "earliest"),
             "enable.auto.commit": False,
         })

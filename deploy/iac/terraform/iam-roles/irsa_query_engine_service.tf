@@ -20,7 +20,7 @@ resource "aws_iam_role" "query_engine_service_irsa" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
-            "${local.oidc_provider_id}:sub" = "system:serviceaccount:contentpulse:query-engine-service"
+            "${local.oidc_provider_id}:sub" = "system:serviceaccount:simple-sport-news:query-engine-service"
             "${local.oidc_provider_id}:aud" = "sts.amazonaws.com"
           }
         }
@@ -31,7 +31,7 @@ resource "aws_iam_role" "query_engine_service_irsa" {
   tags = merge(local.iam_tags, {
     Name      = "${var.environment}-query-engine-service-irsa-role"
     Service   = "query-engine-service"
-    Namespace = "contentpulse"
+    Namespace = "simple-sport-news"
   })
 }
 
@@ -39,7 +39,7 @@ resource "aws_iam_policy" "query_engine_service_policy" {
   count = local.create_irsa ? 1 : 0
 
   name        = "${var.environment}-query-engine-service-policy"
-  description = "IAM policy for query-engine-service in contentpulse namespace"
+  description = "IAM policy for query-engine-service in simple-sport-news namespace"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -68,7 +68,7 @@ resource "aws_iam_policy" "query_engine_service_policy" {
   tags = merge(local.iam_tags, {
     Name      = "${var.environment}-query-engine-service-policy"
     Service   = "query-engine-service"
-    Namespace = "contentpulse"
+    Namespace = "simple-sport-news"
   })
 }
 

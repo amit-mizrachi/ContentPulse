@@ -1,11 +1,11 @@
-# ContentPulse IaC Migration Plan
+# simple_sport_news IaC Migration Plan
 
 ## Context
 
-ContentPulse is a sports content aggregation platform. This plan adapts production-ready Terraform/Terragrunt/Helm infrastructure from the LLM-Judge project, adds a dual-inference architecture with GPU/CPU scheduling, and uses `configuration.hcl` as the single source of truth.
+simple_sport_news is a sports content aggregation platform. This plan adapts production-ready Terraform/Terragrunt/Helm infrastructure from the LLM-Judge project, adds a dual-inference architecture with GPU/CPU scheduling, and uses `configuration.hcl` as the single source of truth.
 
 ### Key Decisions
-- **Fresh `deploy/` directory** inside ContentPulse (reusable modules copied from LLM-Judge)
+- **Fresh `deploy/` directory** inside simple_sport_news (reusable modules copied from LLM-Judge)
 - **`configuration.hcl`** drives everything: AppConfig, CI/CD, Helm values, scheduling
 - **MongoDB Atlas** (Free tier) instead of RDS MySQL
 - **Dual messaging: Kafka (Strimzi) + SNS/SQS** both active
@@ -51,7 +51,7 @@ Created directory structure and copied as-is modules from LLM-Judge.
 
 ### Directory Structure
 ```
-ContentPulse/deploy/
+simple_sport_news/deploy/
 |-- iac/
 |   |-- terraform/
 |   |   |-- vpc/              # COPIED as-is
@@ -74,7 +74,7 @@ ContentPulse/deploy/
 |       |-- dev/               # 12 wrappers (no rds/)
 |-- helm/
     |-- charts/
-    |   |-- contentpulse-service/  # REWRITTEN from llm-judge-service
+    |   |-- simple-sport-news-service/  # REWRITTEN from llm-judge-service
     |   |-- redis/                 # COPIED as-is
     |-- system/
 ```
@@ -87,7 +87,7 @@ Complete rewrite of the SSoT file. Key blocks:
 - **4 services**: gateway (8000), content_poller (8005), content_processor (8003), query_engine (8004)
 - **Kafka config**: Strimzi operator, KRaft mode, 1 broker (dev), topics with 3 partitions
 - **Inference config**: content_processor + query_engine, both "remote" mode by default
-- **MongoDB config**: database_name="contentpulse", collections: articles, queries
+- **MongoDB config**: database_name="simple-sport-news", collections: articles, queries
 - **Secrets config**: llm_api_keys, mongodb_credentials, reddit_credentials
 - **SNS topics**: content_processing, query_answering
 - **SQS queues**: content-processing, query-answering
@@ -104,7 +104,7 @@ Complete rewrite of the SSoT file. Key blocks:
 ### iam-roles/
 - Deleted: irsa_redis_service.tf, irsa_persistence_service.tf, irsa_judge_service.tf, irsa_inference_service.tf
 - Created: irsa_content_poller_service.tf (SNS publish), irsa_content_processor_service.tf (SQS consume + Secrets Manager), irsa_query_engine_service.tf (SQS consume + Secrets Manager)
-- Updated: irsa_gateway_service.tf (namespace: contentpulse, SNS topic: query_answering)
+- Updated: irsa_gateway_service.tf (namespace: simple-sport-news, SNS topic: query_answering)
 - Rewrote: variables.tf, outputs.tf (7 IRSA roles)
 
 ### secrets/
@@ -134,8 +134,8 @@ Complete rewrite of the SSoT file. Key blocks:
 
 ## Phase 4: Helm Chart Modifications - COMPLETED
 
-- Renamed Chart.yaml: `contentpulse-service`
-- Updated _helpers.tpl: all `llm-judge-service` -> `contentpulse-service`
+- Renamed Chart.yaml: `simple-sport-news-service`
+- Updated _helpers.tpl: all `llm-judge-service` -> `simple-sport-news-service`
 - Rewrote deployment.yaml: added `command:`, `args:`, `INFERENCE_MODE` env var
 - Updated all templates: hpa, service, serviceaccount, pdb, ingress, networkpolicy, externalsecret
 - Rewrote values.yaml: added command, args, keda, inferenceMode sections
@@ -185,25 +185,25 @@ Complete rewrite of the SSoT file. Key blocks:
 ### 7.1 Terraform validate (per module)
 ```bash
 for dir in vpc eks ec2 ecr sns sqs security-groups iam-roles secrets appconfig helm-releases k8s-config budgets; do
-  cd ~/Desktop/projects/ContentPulse/deploy/iac/terraform/$dir
+  cd ~/Desktop/projects/simple_sport_news/deploy/iac/terraform/$dir
   terraform init -backend=false && terraform validate
 done
 ```
 
 ### 7.2 Terragrunt plan (dry run)
 ```bash
-cd ~/Desktop/projects/ContentPulse/deploy/iac/terragrunt/dev
+cd ~/Desktop/projects/simple_sport_news/deploy/iac/terragrunt/dev
 terragrunt run-all plan --terragrunt-non-interactive
 ```
 
 ### 7.3 Helm template validation
 ```bash
 # Test gateway release
-helm template test-gw ./deploy/helm/charts/contentpulse-service \
+helm template test-gw ./deploy/helm/charts/simple-sport-news-service \
   --set service.name=gateway-service --set service.containerPort=8000
 
 # Test content-processor in GPU mode
-helm template test-cp ./deploy/helm/charts/contentpulse-service \
+helm template test-cp ./deploy/helm/charts/simple-sport-news-service \
   --set service.name=content-processor-service \
   --set "command[0]=python" --set "command[1]=-m" \
   --set "command[2]=src.services.content_processor.server" \
@@ -213,7 +213,7 @@ helm template test-cp ./deploy/helm/charts/contentpulse-service \
 
 ### 7.4 Local docker-compose smoke test
 ```bash
-cd ~/Desktop/projects/ContentPulse/docker
+cd ~/Desktop/projects/simple_sport_news/docker
 docker compose config && docker compose up --build
 ```
 

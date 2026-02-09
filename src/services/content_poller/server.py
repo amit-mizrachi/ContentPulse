@@ -29,7 +29,7 @@ def create_content_poller() -> ContentPoller:
     try:
         reddit_client_id = config.get("reddit.client_id", "")
         reddit_client_secret = config.get("reddit.client_secret", "")
-        reddit_user_agent = config.get("reddit.user_agent", "ContentPulse/1.0")
+        reddit_user_agent = config.get("reddit.user_agent", "simple_sport_news/1.0")
         subreddits_raw = config.get("reddit.subreddits", "soccer,nba,nfl,formula1")
         subreddits = [s.strip() for s in subreddits_raw.split(",")]
 

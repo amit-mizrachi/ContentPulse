@@ -1,10 +1,10 @@
 # ========================================================================
-# DEFAULT VALUES FOR CONTENTPULSE MICROSERVICES
+# DEFAULT VALUES FOR SIMPLE_SPORT_NEWS MICROSERVICES
 # ========================================================================
 # IMPORTANT: Configuration values come from Terraform-managed ConfigMaps
 # (infra-config). This file only contains Helm-specific settings.
 #
-# Deploy: helm install <name> ./charts/contentpulse-service -f releases/<service>-values.yaml
+# Deploy: helm install <name> ./charts/simple-sport-news-service -f releases/<service>-values.yaml
 # ========================================================================
 
 # Service configuration

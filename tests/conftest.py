@@ -1,4 +1,4 @@
-"""Shared fixtures for ContentPulse tests."""
+"""Shared fixtures for simple_sport_news tests."""
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 

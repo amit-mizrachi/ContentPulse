@@ -6,7 +6,7 @@ locals {
   namespace_name = var.namespace
 }
 
-resource "kubernetes_namespace" "contentpulse_namespace" {
+resource "kubernetes_namespace" "simple_sport_news_namespace" {
   metadata {
     name = local.namespace_name
 

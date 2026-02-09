@@ -2,7 +2,7 @@ from src.shared.interfaces.message_handler import MessageHandler
 from src.shared.interfaces.message_dispatcher import MessageDispatcher
 from src.shared.aws.appconfig_service import get_config_service
 from src.shared.observability.logs.logger import Logger
-from src.shared.messaging.context_preserving_executor import ContextPreservingExecutor
+from src.shared.messaging.context_preserving_thread_pool import ContextPreservingThreadPool
 
 
 class ThreadPoolMessageDispatcher(MessageDispatcher):
@@ -14,7 +14,7 @@ class ThreadPoolMessageDispatcher(MessageDispatcher):
         if max_worker_count is None:
             max_worker_count = self.__appconfig.get("sqs.max_worker_count", 10)
 
-        self._handle_pool = ContextPreservingExecutor(max_workers=max_worker_count)
+        self._handle_pool = ContextPreservingThreadPool(max_workers=max_worker_count)
         self._max_worker_count = max_worker_count
         self._closed = False
 

@@ -4,7 +4,7 @@ kind: ScaledObject
 metadata:
   name: {{ .Values.service.name }}-keda
   labels:
-    {{- include "contentpulse-service.labels" . | nindent 4 }}
+    {{- include "simple-sport-news-service.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     name: {{ .Values.service.name }}

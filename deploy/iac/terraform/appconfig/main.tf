@@ -1,18 +1,18 @@
-resource "aws_appconfig_application" "contentpulse" {
+resource "aws_appconfig_application" "simple-sport-news" {
   name        = var.appconfig_config.application_name
   description = var.appconfig_config.application_description
   tags        = var.common_tags
 }
 
 resource "aws_appconfig_environment" "this" {
-  application_id = aws_appconfig_application.contentpulse.id
+  application_id = aws_appconfig_application.simple-sport-news.id
   name           = var.appconfig_config.environment_name
   description    = var.appconfig_config.environment_description
   tags           = var.common_tags
 }
 
 resource "aws_appconfig_configuration_profile" "runtime" {
-  application_id = aws_appconfig_application.contentpulse.id
+  application_id = aws_appconfig_application.simple-sport-news.id
   name           = var.appconfig_config.configuration_profile_name
   description    = var.appconfig_config.configuration_profile_description
   location_uri   = "hosted"
@@ -30,7 +30,7 @@ resource "aws_appconfig_deployment_strategy" "this" {
 }
 
 resource "aws_appconfig_hosted_configuration_version" "runtime" {
-  application_id           = aws_appconfig_application.contentpulse.id
+  application_id           = aws_appconfig_application.simple-sport-news.id
   configuration_profile_id = aws_appconfig_configuration_profile.runtime.configuration_profile_id
   content_type             = "application/json"
 
@@ -62,7 +62,7 @@ resource "aws_appconfig_hosted_configuration_version" "runtime" {
 }
 
 resource "aws_appconfig_deployment" "runtime" {
-  application_id           = aws_appconfig_application.contentpulse.id
+  application_id           = aws_appconfig_application.simple-sport-news.id
   environment_id           = aws_appconfig_environment.this.environment_id
   configuration_profile_id = aws_appconfig_configuration_profile.runtime.configuration_profile_id
   configuration_version    = aws_appconfig_hosted_configuration_version.runtime.version_number

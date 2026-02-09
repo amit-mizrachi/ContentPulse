@@ -21,7 +21,7 @@ class KafkaPublisher(MessagePublisher):
 
         self._producer = Producer({
             "bootstrap.servers": self._appconfig.get("kafka.bootstrap_servers"),
-            "client.id": self._appconfig.get("kafka.client_id", "contentpulse-producer"),
+            "client.id": self._appconfig.get("kafka.client_id", "simple-sport-news-producer"),
         })
 
         self._topic_map = {

@@ -3,10 +3,10 @@
 # Docs: https://github.com/kubernetes/autoscaler/tree/master/charts/cluster-autoscaler
 
 autoDiscovery:
-  clusterName: dev-contentpulse-cluster
+  clusterName: dev-simple-sport-news-cluster
   tags:
     - k8s.io/cluster-autoscaler/enabled
-    - k8s.io/cluster-autoscaler/dev-contentpulse-cluster
+    - k8s.io/cluster-autoscaler/dev-simple-sport-news-cluster
 
 awsRegion: ap-south-1
 

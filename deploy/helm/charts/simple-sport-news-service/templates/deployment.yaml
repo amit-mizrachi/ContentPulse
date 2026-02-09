@@ -7,25 +7,24 @@ kind: Deployment
 metadata:
   name: {{ $serviceName }}
   labels:
-    {{- include "contentpulse-service.labels" . | nindent 4 }}
+    {{- include "simple-sport-news-service.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "contentpulse-service.selectorLabels" . | nindent 6 }}
+      {{- include "simple-sport-news-service.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations:
-        configmap.reloader.stakater.com/reload: "infra-config"
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       labels:
-        {{- include "contentpulse-service.selectorLabels" . | nindent 8 }}
+        {{- include "simple-sport-news-service.selectorLabels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "contentpulse-service.serviceAccountName" . }}
+      serviceAccountName: {{ include "simple-sport-news-service.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:

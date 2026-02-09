@@ -77,7 +77,7 @@ alloy:
         // Parse CRI log wrapper (containerd/CRI-O format)
         stage.cri {}
 
-        // Parse JSON structured logs (ContentPulse services emit JSON to stdout)
+        // Parse JSON structured logs (simple_sport_news services emit JSON to stdout)
         stage.json {
           expressions = {
             level        = "level",

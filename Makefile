@@ -2,7 +2,7 @@
 
 # Build the base image
 build-base:
-	docker build -t contentpulse-base:latest -f deploy/docker/Dockerfile.base .
+	docker build -t simple-sport-news-base:latest -f deploy/docker/Dockerfile.base .
 
 # Build all service images (requires base image)
 build-all: build-base
@@ -31,7 +31,7 @@ logs-%:
 # Clean up volumes and images
 clean:
 	docker-compose -f deploy/docker/docker-compose.yml down -v
-	docker rmi contentpulse-base:latest || true
+	docker rmi simple-sport-news-base:latest || true
 
 # Rebuild everything from scratch
 rebuild: clean build-all

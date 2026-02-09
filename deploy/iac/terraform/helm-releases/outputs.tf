@@ -5,8 +5,8 @@
 output "namespace" {
   description = "Application namespace details"
   value = {
-    name = kubernetes_namespace.contentpulse_namespace.metadata[0].name
-    uid  = kubernetes_namespace.contentpulse_namespace.metadata[0].uid
+    name = kubernetes_namespace.simple_sport_news_namespace.metadata[0].name
+    uid  = kubernetes_namespace.simple_sport_news_namespace.metadata[0].uid
   }
 }
 

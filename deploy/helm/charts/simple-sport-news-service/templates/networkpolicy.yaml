@@ -4,11 +4,11 @@ kind: NetworkPolicy
 metadata:
   name: {{ .Values.service.name }}
   labels:
-    {{- include "contentpulse-service.labels" . | nindent 4 }}
+    {{- include "simple-sport-news-service.labels" . | nindent 4 }}
 spec:
   podSelector:
     matchLabels:
-      {{- include "contentpulse-service.selectorLabels" . | nindent 6 }}
+      {{- include "simple-sport-news-service.selectorLabels" . | nindent 6 }}
   policyTypes:
     - Ingress
     - Egress

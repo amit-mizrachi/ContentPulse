@@ -8,7 +8,7 @@ resource "helm_release" "redis_cache_release" {
   repository       = "https://charts.bitnami.com/bitnami"
   chart            = "redis"
   version          = "18.6.1"
-  namespace        = kubernetes_namespace.contentpulse_namespace.metadata[0].name
+  namespace        = kubernetes_namespace.simple_sport_news_namespace.metadata[0].name
   create_namespace = false
 
   values = [<<-EOT
@@ -64,7 +64,7 @@ EOT
 
   depends_on = [
     helm_release.metrics_server_release,
-    kubernetes_namespace.contentpulse_namespace,
+    kubernetes_namespace.simple_sport_news_namespace,
     kubernetes_storage_class.gp3
   ]
 }

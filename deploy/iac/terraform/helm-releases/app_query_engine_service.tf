@@ -5,8 +5,8 @@
 
 resource "helm_release" "query_engine_service_release" {
   name      = "query-engine-service"
-  chart     = local.contentpulse_chart_path
-  namespace = kubernetes_namespace.contentpulse_namespace.metadata[0].name
+  chart     = local.simple_sport_news_chart_path
+  namespace = kubernetes_namespace.simple_sport_news_namespace.metadata[0].name
 
   values = [
     yamlencode({

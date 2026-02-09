@@ -64,7 +64,7 @@ variable "vpc_id" {
 variable "namespace" {
   description = "Kubernetes namespace"
   type        = string
-  default     = "contentpulse"
+  default     = "simple-sport-news"
 }
 
 # ========================================================================

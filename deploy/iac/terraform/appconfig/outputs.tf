@@ -1,9 +1,9 @@
 output "appconfig_application" {
   description = "AppConfig application details"
   value = {
-    id   = aws_appconfig_application.contentpulse.id
-    arn  = aws_appconfig_application.contentpulse.arn
-    name = aws_appconfig_application.contentpulse.name
+    id   = aws_appconfig_application.simple-sport-news.id
+    arn  = aws_appconfig_application.simple-sport-news.arn
+    name = aws_appconfig_application.simple-sport-news.name
   }
 }
 

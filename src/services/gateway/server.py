@@ -12,7 +12,7 @@ from src.shared.aws.appconfig_service import get_config_service
 from src.shared.storage.redis_client import get_state_repository
 from src.shared.config.ports import get_service_port
 
-app = FastAPI(title="ContentPulse Gateway")
+app = FastAPI(title="simple_sport_news Gateway")
 logger = Logger()
 spanner = Spanner()
 

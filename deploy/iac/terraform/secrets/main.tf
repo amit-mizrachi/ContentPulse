@@ -1,5 +1,5 @@
 # ========================================================================
-# CONTENTPULSE SECRETS - GENERIC FOR_EACH PATTERN
+# SIMPLE_SPORT_NEWS SECRETS - GENERIC FOR_EACH PATTERN
 # Creates secret containers only. Values set manually.
 # ========================================================================
 

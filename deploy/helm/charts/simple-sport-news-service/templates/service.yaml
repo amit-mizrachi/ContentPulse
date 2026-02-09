@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ .Values.service.name }}
   labels:
-    {{- include "contentpulse-service.labels" . | nindent 4 }}
+    {{- include "simple-sport-news-service.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type | default "ClusterIP" }}
   ports:
@@ -12,4 +12,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "contentpulse-service.selectorLabels" . | nindent 4 }}
+    {{- include "simple-sport-news-service.selectorLabels" . | nindent 4 }}

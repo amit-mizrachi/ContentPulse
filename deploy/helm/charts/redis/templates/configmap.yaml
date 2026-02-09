@@ -6,7 +6,7 @@ metadata:
     {{- include "redis.labels" . | nindent 4 }}
 data:
   redis.conf: |
-    # Redis configuration for ContentPulse
+    # Redis configuration for simple_sport_news
     # Managed by Helm chart
 
     # Network

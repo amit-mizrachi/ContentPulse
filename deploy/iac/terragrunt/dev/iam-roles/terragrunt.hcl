@@ -10,12 +10,12 @@ dependency "sns" {
       content_processing = {
         arn  = "arn:aws:sns:us-east-1:123456789012:mock-content-processing-topic"
         id   = "mock-content-processing-topic"
-        name = "dev-contentpulse-content-processing-topic"
+        name = "dev-simple-sport-news-content-processing-topic"
       }
       query_answering = {
         arn  = "arn:aws:sns:us-east-1:123456789012:mock-query-answering-topic"
         id   = "mock-query-answering-topic"
-        name = "dev-contentpulse-query-answering-topic"
+        name = "dev-simple-sport-news-query-answering-topic"
       }
     }
   }
@@ -30,13 +30,13 @@ dependency "sqs" {
         arn  = "arn:aws:sqs:us-east-1:123456789012:mock-content-processing-queue"
         id   = "mock-content-processing-queue"
         url  = "https://sqs.us-east-1.amazonaws.com/123456789012/mock-content-processing-queue"
-        name = "dev-contentpulse-content-processing-queue"
+        name = "dev-simple-sport-news-content-processing-queue"
       }
       query_answering = {
         arn  = "arn:aws:sqs:us-east-1:123456789012:mock-query-answering-queue"
         id   = "mock-query-answering-queue"
         url  = "https://sqs.us-east-1.amazonaws.com/123456789012/mock-query-answering-queue"
-        name = "dev-contentpulse-query-answering-queue"
+        name = "dev-simple-sport-news-query-answering-queue"
       }
     }
   }
@@ -50,17 +50,17 @@ dependency "secrets" {
       llm_api_keys = {
         arn  = "arn:aws:secretsmanager:us-east-1:123456789012:secret:mock-llm-api-keys"
         id   = "mock-llm-api-keys"
-        name = "dev/contentpulse/llm/api-keys"
+        name = "dev/simple-sport-news/llm/api-keys"
       }
       mongodb_credentials = {
         arn  = "arn:aws:secretsmanager:us-east-1:123456789012:secret:mock-mongodb-creds"
         id   = "mock-mongodb-creds"
-        name = "dev/contentpulse/mongodb/credentials"
+        name = "dev/simple-sport-news/mongodb/credentials"
       }
       reddit_credentials = {
         arn  = "arn:aws:secretsmanager:us-east-1:123456789012:secret:mock-reddit-creds"
         id   = "mock-reddit-creds"
-        name = "dev/contentpulse/reddit/credentials"
+        name = "dev/simple-sport-news/reddit/credentials"
       }
     }
   }

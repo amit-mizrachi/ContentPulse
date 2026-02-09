@@ -9,7 +9,7 @@ locals {
 resource "kubernetes_config_map" "infra_config" {
   metadata {
     name      = local.infra_configmap_name
-    namespace = kubernetes_namespace.contentpulse_namespace.metadata[0].name
+    namespace = kubernetes_namespace.simple_sport_news_namespace.metadata[0].name
     labels = {}
   }
 

@@ -1,6 +1,6 @@
 # ========================================================================
-# CONTENTPULSE - GLOBAL CONFIGURATION
-# Single Source of Truth for ContentPulse Infrastructure
+# SIMPLE_SPORT_NEWS - GLOBAL CONFIGURATION
+# Single Source of Truth for simple_sport_news Infrastructure
 # ========================================================================
 # IMPORTANT: This file is the ONLY place to define configuration values.
 # All other files (Helm, Docker, Python) should reference these values.
@@ -13,8 +13,8 @@ locals {
   aws_account_id     = "640056739274"
   aws_region         = "ap-south-1"   # Mumbai - cost optimized
   environment        = "dev"          # dev | staging | prod
-  project_name       = "contentpulse"
-  namespace          = "contentpulse" # Kubernetes namespace
+  project_name       = "simple-sport-news"
+  namespace          = "simple-sport-news" # Kubernetes namespace
 
   # ========================================================================
   # SERVICE PORTS - SINGLE SOURCE OF TRUTH
@@ -120,7 +120,7 @@ locals {
 
     # Kafka cluster deployed via Strimzi CRD
     cluster = {
-      name     = "contentpulse-kafka"
+      name     = "simple-sport-news-kafka"
       version  = "3.8.0"
       replicas = 1                # Single broker for dev (3 for prod)
 
@@ -180,7 +180,7 @@ locals {
     }
 
     # Bootstrap server DNS (Strimzi convention)
-    bootstrap_servers = "contentpulse-kafka-kafka-bootstrap.contentpulse.svc.cluster.local:9092"
+    bootstrap_servers = "simple-sport-news-kafka-kafka-bootstrap.simple-sport-news.svc.cluster.local:9092"
   }
 
   # ========================================================================
@@ -380,7 +380,7 @@ locals {
   # ========================================================================
   mongodb_config = {
     connection_string_secret = "mongodb-atlas-credentials"
-    database_name            = "contentpulse"
+    database_name            = "simple-sport-news"
     collections = {
       articles = "articles"
       queries  = "queries"
@@ -393,7 +393,7 @@ locals {
   redis_k8s_config = {
     image            = "redis:7.1-alpine"
     service_name     = "redis"
-    service_dns      = "redis.contentpulse.svc.cluster.local"
+    service_dns      = "redis.simple-sport-news.svc.cluster.local"
     port             = 6379
     default_ttl_seconds = 604800  # 7 days
 
@@ -480,11 +480,11 @@ locals {
   # ========================================================================
   appconfig_config = {
     application_name            = join("-", [local.environment, local.project_name, "app"])
-    application_description     = "ContentPulse Application Configuration"
+    application_description     = "simple_sport_news Application Configuration"
     environment_name            = local.environment
     environment_description     = "Environment configuration for ${local.environment}"
     configuration_profile_name  = "runtime-config"
-    configuration_profile_description = "Runtime configuration for ContentPulse services"
+    configuration_profile_description = "Runtime configuration for simple_sport_news services"
 
     # Hosted configuration content (JSON) - merged with dynamic values in Terraform
     configuration_content = {

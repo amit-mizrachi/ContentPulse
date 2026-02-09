@@ -30,6 +30,7 @@ variable "eks_config" {
     cluster_version         = string
     endpoint_private_access = bool
     endpoint_public_access  = bool
+    public_access_cidrs     = list(string)
 
     system_node_group = object({
       name           = string

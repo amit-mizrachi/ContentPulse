@@ -10,12 +10,12 @@ dependency "sns" {
       content_processing = {
         arn  = "arn:aws:sns:us-east-1:123456789012:mock-content-processing-topic"
         id   = "mock-content-processing-topic"
-        name = "dev-contentpulse-content-processing-topic"
+        name = "dev-simple-sport-news-content-processing-topic"
       }
       query_answering = {
         arn  = "arn:aws:sns:us-east-1:123456789012:mock-query-answering-topic"
         id   = "mock-query-answering-topic"
-        name = "dev-contentpulse-query-answering-topic"
+        name = "dev-simple-sport-news-query-answering-topic"
       }
     }
   }

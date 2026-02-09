@@ -1,13 +1,13 @@
 apiVersion: v2
 name: redis
-description: Redis cache for ContentPulse microservices
+description: Redis cache for simple_sport_news microservices
 type: application
 version: 1.0.0
 appVersion: "7.1"
 maintainers:
-  - name: ContentPulse Team
+  - name: simple_sport_news Team
     email: team@example.com
 keywords:
   - redis
   - cache
-  - contentpulse
+  - simple-sport-news

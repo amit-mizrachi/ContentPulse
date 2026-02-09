@@ -9,7 +9,7 @@ resource "kubernetes_manifest" "kafka_cluster" {
     kind       = "Kafka"
     metadata = {
       name      = var.kafka_config.cluster.name
-      namespace = kubernetes_namespace.contentpulse_namespace.metadata[0].name
+      namespace = kubernetes_namespace.simple_sport_news_namespace.metadata[0].name
     }
     spec = {
       kafka = {
@@ -50,7 +50,7 @@ resource "kubernetes_manifest" "kafka_cluster" {
 
   depends_on = [
     helm_release.strimzi_operator_release,
-    kubernetes_namespace.contentpulse_namespace
+    kubernetes_namespace.simple_sport_news_namespace
   ]
 }
 
@@ -60,7 +60,7 @@ resource "kubernetes_manifest" "kafka_topic_content_processing" {
     kind       = "KafkaTopic"
     metadata = {
       name      = var.kafka_config.topics.content_processing.name
-      namespace = kubernetes_namespace.contentpulse_namespace.metadata[0].name
+      namespace = kubernetes_namespace.simple_sport_news_namespace.metadata[0].name
       labels = {
         "strimzi.io/cluster" = var.kafka_config.cluster.name
       }
@@ -81,7 +81,7 @@ resource "kubernetes_manifest" "kafka_topic_query_answering" {
     kind       = "KafkaTopic"
     metadata = {
       name      = var.kafka_config.topics.query_answering.name
-      namespace = kubernetes_namespace.contentpulse_namespace.metadata[0].name
+      namespace = kubernetes_namespace.simple_sport_news_namespace.metadata[0].name
       labels = {
         "strimzi.io/cluster" = var.kafka_config.cluster.name
       }

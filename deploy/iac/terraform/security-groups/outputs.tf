@@ -20,7 +20,7 @@ output "eks_nodes_security_group" {
   }
 }
 
-# RDS security group removed - ContentPulse uses MongoDB Atlas (no MySQL)
+# RDS security group removed - simple_sport_news uses MongoDB Atlas (no MySQL)
 
 output "nat_instance_security_group" {
   description = "NAT instance security group details"

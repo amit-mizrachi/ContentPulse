@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Callable
 
 
-class ContextPreservingExecutor(ThreadPoolExecutor):
+class ContextPreservingThreadPool(ThreadPoolExecutor):
     """
     A ThreadPoolExecutor that preserves context variables (including OTLP telemetry context)
     across thread boundaries. This prevents telemetry context from leaking between threads.

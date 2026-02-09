@@ -2,7 +2,7 @@
 # Helm chart: eks/aws-load-balancer-controller
 # Docs: https://kubernetes-sigs.github.io/aws-load-balancer-controller
 
-clusterName: dev-contentpulse-cluster
+clusterName: dev-simple-sport-news-cluster
 
 serviceAccount:
   create: true
