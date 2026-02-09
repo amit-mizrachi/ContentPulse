@@ -8,15 +8,12 @@ from src.shared.observability.logs.logger import Logger
 from src.shared.observability.traces.spans.span_context_factory import SpanContextFactory
 from src.shared.observability.traces.spans.spanner import Spanner
 from src.shared.messaging.messaging_factory import get_message_publisher
-from src.shared.aws.appconfig_service import get_config_service
-from src.shared.storage.redis_state_repository import get_state_repository
-from src.shared.config.ports import get_service_port
+from src.shared.appconfig_client import get_config_service
+from src.shared.repositories.redis_state_repository import get_state_repository
 
 app = FastAPI(title="simple_sport_news Gateway")
 logger = Logger()
 spanner = Spanner()
-
-SERVICE_PORT_KEY = "services.gateway.port"
 
 
 def create_request_service() -> RequestSubmissionService:
@@ -60,6 +57,6 @@ async def health_check():
 
 
 if __name__ == "__main__":
-    port = get_service_port(SERVICE_PORT_KEY)
+    port = int(get_config_service().get("services.gateway.port"))
     logger.info(f"Starting Gateway Service on port {port}")
     uvicorn.run(app, host="0.0.0.0", port=port)

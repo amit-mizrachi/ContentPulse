@@ -9,7 +9,7 @@ from src.shared.observability.logs.logger import Logger
 from src.shared.interfaces.messaging.message_dispatcher import MessageDispatcher
 from src.shared.observability.traces.spans.span_context_factory import SpanContextFactory
 from src.shared.observability.traces.spans.spanner import Spanner
-from src.shared.aws.appconfig_service import get_config_service
+from src.shared.appconfig_client import get_config_service
 
 
 class KafkaConsumer(AsyncMessageConsumer):

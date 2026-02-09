@@ -4,17 +4,15 @@ from functools import lru_cache
 import boto3
 
 from src.shared.observability.logs.logger import Logger
-from src.shared.aws.appconfig_service import get_config_service
+from src.shared.appconfig_client import get_config_service
 
 
-class SQSService:
-    """AWS SQS message consumer."""
-
+class SQSClient:
     def __init__(self):
         self._appconfig = get_config_service()
         self._sqs_client = boto3.client(
             "sqs",
-            region_name=self._appconfig.get("aws.region")
+            region_name=self._appconfig.get("clients.region")
         )
         self._logger = Logger()
 
@@ -58,6 +56,6 @@ class SQSService:
 
 
 @lru_cache(maxsize=1)
-def get_sqs_service() -> SQSService:
+def get_sqs_service() -> SQSClient:
     """Get the singleton SQSService instance."""
-    return SQSService()
+    return SQSClient()

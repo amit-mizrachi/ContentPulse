@@ -4,13 +4,13 @@ from typing import Any, Dict, List, Optional
 
 from pymongo import MongoClient, TEXT, ASCENDING, DESCENDING
 
-from src.shared.interfaces.article_repository import ArticleRepository
+from src.shared.interfaces.repositories.article_repository import ArticleRepository
 from src.shared.objects.content.processed_article import ProcessedArticle
-from src.shared.aws.appconfig_service import get_config_service
+from src.shared.appconfig_client import get_config_service
 
 
 class MongoDBArticleRepository(ArticleRepository):
-    """MongoDB-backed article repository for storage and querying."""
+    """MongoDB-backed article repository for repositories and querying."""
 
     def __init__(self):
         config = get_config_service()

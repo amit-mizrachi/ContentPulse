@@ -2,7 +2,7 @@
 import uuid
 
 from src.shared.interfaces.messaging.message_publisher import MessagePublisher
-from src.shared.interfaces.request_state_repository import RequestStateRepository
+from src.shared.interfaces.repositories.request_state_repository import RequestStateRepository
 from src.shared.objects.enums.request_stage import RequestStage
 from src.shared.objects.enums.request_status import RequestStatus
 from src.shared.objects.requests.processed_request import ProcessedRequest

@@ -6,9 +6,9 @@ from typing import Any, Dict, Optional
 
 import redis
 
-from src.shared.interfaces.request_state_repository import RequestStateRepository
+from src.shared.interfaces.repositories.request_state_repository import RequestStateRepository
 from src.shared.objects.requests.processed_request import ProcessedRequest
-from src.shared.aws.appconfig_service import get_config_service
+from src.shared.appconfig_client import get_config_service
 
 
 class RedisStateRepository(RequestStateRepository):

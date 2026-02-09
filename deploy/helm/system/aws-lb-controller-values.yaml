@@ -1,12 +1,12 @@
 # AWS Load Balancer Controller Values
-# Helm chart: eks/aws-load-balancer-controller
+# Helm chart: eks/clients-load-balancer-controller
 # Docs: https://kubernetes-sigs.github.io/aws-load-balancer-controller
 
 clusterName: dev-simple-sport-news-cluster
 
 serviceAccount:
   create: true
-  name: aws-load-balancer-controller
+  name: clients-load-balancer-controller
   annotations:
     # IMPORTANT: Update with actual IAM role ARN after terraform apply
     # Role ARN set dynamically by Terraform Helm provider
@@ -37,4 +37,4 @@ logLevel: info
 
 # Pod configuration
 podLabels:
-  app: aws-load-balancer-controller
+  app: clients-load-balancer-controller

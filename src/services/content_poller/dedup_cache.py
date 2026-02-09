@@ -1,17 +1,11 @@
 """Redis Set-based deduplication cache for fast article existence checks."""
 import redis
 
-from src.shared.aws.appconfig_service import get_config_service
+from src.shared.appconfig_client import get_config_service
 from src.shared.observability.logs.logger import Logger
 
 
 class DeduplicationCache:
-    """Fast in-memory dedup using a Redis Set.
-
-    Checks Redis first (sub-millisecond). Falls back to the content
-    repository (MongoDB via HTTP) only when Redis is unavailable.
-    """
-
     _SET_KEY = "dedup:seen_articles"
 
     def __init__(self):

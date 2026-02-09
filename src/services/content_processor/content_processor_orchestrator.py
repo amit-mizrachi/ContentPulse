@@ -3,7 +3,7 @@ import json
 import time
 from datetime import datetime, timezone
 
-from src.shared.interfaces.article_repository import ArticleRepository
+from src.shared.interfaces.repositories.article_repository import ArticleRepository
 from src.shared.interfaces.inference.inference_provider import InferenceProvider
 from src.shared.interfaces.messaging.message_handler import MessageHandler
 from src.shared.objects.inference.inference_config import InferenceConfig
@@ -41,7 +41,7 @@ Return ONLY valid JSON, no markdown."""
 
 
 class ContentProcessorOrchestrator(MessageHandler):
-    """Processes raw content: LLM enrichment → MongoDB storage."""
+    """Processes raw content: LLM enrichment → MongoDB repositories."""
 
     def __init__(
         self,

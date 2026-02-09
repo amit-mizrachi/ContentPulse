@@ -4,8 +4,8 @@ from collections import OrderedDict
 from datetime import datetime, timezone
 from typing import Optional, Any
 
-from src.shared.aws.appconfig_service import get_config_service
-from src.shared.aws.sqs_service import get_sqs_service
+from src.shared.appconfig_client import get_config_service
+from src.shared.messaging.sqs.sqs_client import get_sqs_service
 from src.shared.observability.logs.logger import Logger
 
 

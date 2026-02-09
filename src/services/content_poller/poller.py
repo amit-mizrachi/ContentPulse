@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from src.shared.interfaces.article_repository import ArticleRepository
+from src.shared.interfaces.repositories.article_repository import ArticleRepository
 from src.shared.interfaces.content_source import ContentSource
 from src.shared.interfaces.messaging.message_publisher import MessagePublisher
 from src.shared.objects.messages.content_message import ContentMessage

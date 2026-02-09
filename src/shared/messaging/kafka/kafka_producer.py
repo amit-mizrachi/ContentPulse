@@ -6,7 +6,7 @@ from confluent_kafka import Producer
 from src.shared.interfaces.messaging.message_publisher import MessagePublisher
 from src.shared.observability.logs.logger import Logger
 from src.shared.observability.traces.spans.span_context_factory import SpanContextFactory
-from src.shared.aws.appconfig_service import get_config_service
+from src.shared.appconfig_client import get_config_service
 
 
 class KafkaPublisher(MessagePublisher):

@@ -4,7 +4,7 @@ from functools import lru_cache
 from src.shared.interfaces.messaging.message_consumer import AsyncMessageConsumer
 from src.shared.interfaces.messaging.message_publisher import MessagePublisher
 from src.shared.interfaces.messaging.message_dispatcher import MessageDispatcher
-from src.shared.aws.appconfig_service import get_config_service
+from src.shared.appconfig_client import get_config_service
 
 CONSUMER_CONFIG_KEYS = {
     "sns_sqs": {
@@ -27,7 +27,7 @@ def get_message_publisher() -> MessagePublisher:
         from src.shared.messaging.kafka import get_kafka_publisher
         return get_kafka_publisher()
     else:
-        from src.shared.aws.sns_service import get_sns_service
+        from src.shared.messaging.sqs.sns_message_publisher import get_sns_service
         return get_sns_service()
 
 

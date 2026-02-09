@@ -4,11 +4,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.interfaces.article_repository import ArticleRepository
+from src.shared.interfaces.repositories.article_repository import ArticleRepository
 from src.shared.interfaces.inference.inference_provider import InferenceProvider
 from src.shared.objects.inference.inference_result import InferenceResult
 from src.shared.interfaces.messaging.message_publisher import MessagePublisher
-from src.shared.interfaces.request_state_repository import RequestStateRepository
+from src.shared.interfaces.repositories.request_state_repository import RequestStateRepository
 from src.shared.objects.content.raw_article import RawArticle
 from src.shared.objects.content.article_entity import ArticleEntity
 from src.shared.objects.content.processed_article import ProcessedArticle

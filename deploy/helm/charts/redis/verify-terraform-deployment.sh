@@ -166,7 +166,7 @@ if kubectl get pvc -n "$NAMESPACE" -l app=redis &> /dev/null; then
     if [ "$PVC_STATUS" == "Bound" ]; then
         check_pass "PVC is Bound"
 
-        # Check storage class
+        # Check repositories class
         PVC_SC=$(kubectl get pvc -n "$NAMESPACE" -l app=redis -o jsonpath='{.items[0].spec.storageClassName}')
         if [ "$PVC_SC" == "gp3" ]; then
             check_pass "PVC uses StorageClass: $PVC_SC"

@@ -9,16 +9,12 @@ from src.services.content_poller.sources.rss_content_source import RSSContentSou
 from src.shared.observability.logs.logger import Logger
 from src.shared.observability.traces.tracer import Tracer
 from src.shared.messaging.messaging_factory import get_message_publisher
-from src.shared.aws.appconfig_service import get_config_service
-from src.shared.storage.mongodb_article_repository import get_content_repository
-from src.shared.config.health import start_health_server_background
-from src.shared.config.ports import get_service_port
+from src.shared.appconfig_client import get_config_service
+from src.shared.repositories.mongodb_article_repository import get_content_repository
+from src.shared.health import start_health_server_background
 
 logger = Logger()
 tracer = Tracer()
-
-SERVICE_PORT_KEY = "services.content_poller.port"
-DEFAULT_PORT = 8005
 
 
 def create_content_poller() -> ContentPoller:
@@ -77,12 +73,11 @@ async def main():
 
     poller = create_content_poller()
 
-    port = get_service_port(SERVICE_PORT_KEY, default=DEFAULT_PORT)
+    port = int(get_config_service().get("services.content_poller.port"))
     logger.info(f"Starting health server on port {port}")
     health_task = start_health_server_background(
         service_name="Content Poller Service",
-        appconfig_key=SERVICE_PORT_KEY,
-        default_port=DEFAULT_PORT
+        port=port
     )
 
     loop = asyncio.get_running_loop()

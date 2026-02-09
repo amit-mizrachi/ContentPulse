@@ -6,17 +6,15 @@ import boto3
 from src.shared.interfaces.messaging.message_publisher import MessagePublisher
 from src.shared.observability.logs.logger import Logger
 from src.shared.observability.traces.spans.span_context_factory import SpanContextFactory
-from src.shared.aws.appconfig_service import get_config_service
+from src.shared.appconfig_client import get_config_service
 
 
-class SNSService(MessagePublisher):
-    """AWS SNS message publisher."""
-
+class SNSMessagePublisher(MessagePublisher):
     def __init__(self):
         self._appconfig = get_config_service()
         self._sns_client = boto3.client(
             "sns",
-            region_name=self._appconfig.get("aws.region")
+            region_name=self._appconfig.get("clients.region")
         )
         self._logger = Logger()
         self._topic_map = {
@@ -47,6 +45,6 @@ class SNSService(MessagePublisher):
 
 
 @lru_cache(maxsize=1)
-def get_sns_service() -> SNSService:
+def get_sns_service() -> SNSMessagePublisher:
     """Get the singleton SNSService instance."""
-    return SNSService()
+    return SNSMessagePublisher()

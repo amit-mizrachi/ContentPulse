@@ -1,4 +1,4 @@
-"""AWS AppConfig service for configuration management."""
+"""AWS AppConfig client for configuration management."""
 import json
 import os
 from functools import lru_cache
@@ -7,16 +7,13 @@ from typing import Any, Optional
 import boto3
 
 
-class AppConfigService:
-    """AWS AppConfig client for dynamic configuration."""
-
+class AppConfigClient:
     def __init__(self):
-        self._application_id = os.environ.get("APPCONFIG_APPLICATION_ID", "")
-        self._environment_id = os.environ.get("APPCONFIG_ENVIRONMENT_ID", "")
-        self._configuration_profile_id = os.environ.get("APPCONFIG_PROFILE_ID", "")
-        region = os.environ.get("AWS_REGION", "ap-south-1")
+        self._application_id = os.environ.get("APPCONFIG_APPLICATION_ID")
+        self._environment_id = os.environ.get("APPCONFIG_ENVIRONMENT_ID")
+        self._configuration_profile_id = os.environ.get("APPCONFIG_PROFILE_ID")
 
-        self._client = boto3.client("appconfigdata", region_name=region)
+        self._client = boto3.client("appconfigdata")
         self._cached_config: Optional[dict] = None
         self._next_poll_token: Optional[str] = None
 
@@ -70,6 +67,5 @@ class AppConfigService:
 
 
 @lru_cache(maxsize=1)
-def get_config_service() -> AppConfigService:
-    """Get the singleton AppConfigService instance."""
-    return AppConfigService()
+def get_config_service() -> AppConfigClient:
+    return AppConfigClient()

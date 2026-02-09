@@ -191,7 +191,7 @@ kubectl get storageclass gp3
 kubectl describe storageclass gp3
 
 # Check EBS CSI driver
-kubectl get pods -n kube-system -l app.kubernetes.io/name=aws-ebs-csi-driver
+kubectl get pods -n kube-system -l app.kubernetes.io/name=clients-ebs-csi-driver
 ```
 
 ### Terraform Apply Fails

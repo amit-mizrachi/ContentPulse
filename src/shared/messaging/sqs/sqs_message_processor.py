@@ -4,8 +4,8 @@ from asyncio import BoundedSemaphore
 from concurrent.futures import Future
 from typing import Optional
 
-from src.shared.aws.appconfig_service import get_config_service
-from src.shared.aws.sqs_service import get_sqs_service
+from src.shared.appconfig_client import get_config_service
+from src.shared.messaging.sqs.sqs_client import get_sqs_service
 from src.shared.observability.logs.logger import Logger
 from src.shared.observability.traces.spans.span_context_factory import SpanContextFactory
 from src.shared.observability.traces.spans.spanner import Spanner

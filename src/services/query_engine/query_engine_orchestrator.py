@@ -3,11 +3,11 @@ import json
 import time
 from datetime import datetime, timezone
 
-from src.shared.interfaces.article_repository import ArticleRepository
+from src.shared.interfaces.repositories.article_repository import ArticleRepository
 from src.shared.interfaces.inference.inference_provider import InferenceProvider
 from src.shared.interfaces.messaging.message_handler import MessageHandler
 from src.shared.objects.inference.inference_config import InferenceConfig
-from src.shared.interfaces.request_state_repository import RequestStateRepository
+from src.shared.interfaces.repositories.request_state_repository import RequestStateRepository
 from src.shared.objects.enums.request_stage import RequestStage
 from src.shared.objects.messages.query_message import QueryMessage
 from src.shared.objects.results.query_result import QueryResult

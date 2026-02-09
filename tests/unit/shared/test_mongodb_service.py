@@ -23,15 +23,15 @@ class TestMongoDBArticleRepository:
     @pytest.fixture
     def repository(self, mock_mongo):
         mock_client, mock_db, mock_collection = mock_mongo
-        with patch("src.shared.storage.mongodb_article_repository.get_config_service") as mock_config, \
-             patch("src.shared.storage.mongodb_article_repository.MongoClient", return_value=mock_client):
+        with patch("src.shared.repositories.mongodb_article_repository.get_config_service") as mock_config, \
+             patch("src.shared.repositories.mongodb_article_repository.MongoClient", return_value=mock_client):
             mock_config.return_value.get.side_effect = lambda key, default=None: {
                 "mongodb.host": "localhost",
                 "mongodb.port": "27017",
                 "mongodb.database": "testdb",
             }.get(key, default)
 
-            from src.shared.storage.mongodb_article_repository import MongoDBArticleRepository
+            from src.shared.repositories.mongodb_article_repository import MongoDBArticleRepository
             repo = MongoDBArticleRepository()
         return repo, mock_collection
 

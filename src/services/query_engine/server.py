@@ -7,18 +7,14 @@ from src.shared.observability.logs.logger import Logger
 from src.shared.observability.traces.tracer import Tracer
 from src.shared.messaging.messaging_factory import get_message_consumer
 from src.shared.messaging.thread_pool_message_dispatcher import ThreadPoolMessageDispatcher
-from src.shared.aws.appconfig_service import get_config_service
-from src.shared.storage.mongodb_article_repository import get_content_repository
-from src.shared.storage.redis_state_repository import get_state_repository
-from src.shared.config.health import start_health_server_background
-from src.shared.config.ports import get_service_port
+from src.shared.appconfig_client import get_config_service
+from src.shared.repositories.mongodb_article_repository import get_content_repository
+from src.shared.repositories.redis_state_repository import get_state_repository
+from src.shared.health import start_health_server_background
 from src.shared.inference.provider_config_builder import build_provider_config
 
 logger = Logger()
 tracer = Tracer()
-
-SERVICE_PORT_KEY = "services.query_engine.port"
-DEFAULT_PORT = 8004
 
 
 def create_query_engine_orchestrator() -> QueryEngineOrchestrator:
@@ -39,12 +35,11 @@ async def main():
     handler = ThreadPoolMessageDispatcher(orchestrator)
     consumer = get_message_consumer(handler, service_name="query_engine")
 
-    port = get_service_port(SERVICE_PORT_KEY, default=DEFAULT_PORT)
+    port = int(get_config_service().get("services.query_engine.port"))
     logger.info(f"Starting health server on port {port}")
     health_task = start_health_server_background(
         service_name="Query Engine Service",
-        appconfig_key=SERVICE_PORT_KEY,
-        default_port=DEFAULT_PORT
+        port=port
     )
 
     loop = asyncio.get_running_loop()

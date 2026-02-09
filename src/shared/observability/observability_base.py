@@ -4,7 +4,7 @@ import opentelemetry.context
 import opentelemetry.propagate
 import opentelemetry.trace
 
-from src.shared.aws.appconfig_service import get_config_service
+from src.shared.appconfig_client import get_config_service
 from src.shared.observability.constants import DEFAULT_ATTRIBUTE
 from src.shared.patterns.singleton import Singleton
 

@@ -1,4 +1,4 @@
-"""Content Repository Interface - defines the contract for article storage."""
+"""Content Repository Interface - defines the contract for article repositories."""
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 

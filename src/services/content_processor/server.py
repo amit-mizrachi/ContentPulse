@@ -7,17 +7,13 @@ from src.shared.observability.logs.logger import Logger
 from src.shared.observability.traces.tracer import Tracer
 from src.shared.messaging.messaging_factory import get_message_consumer
 from src.shared.messaging.thread_pool_message_dispatcher import ThreadPoolMessageDispatcher
-from src.shared.aws.appconfig_service import get_config_service
-from src.shared.storage.mongodb_article_repository import get_content_repository
-from src.shared.config.health import start_health_server_background
-from src.shared.config.ports import get_service_port
+from src.shared.appconfig_client import get_config_service
+from src.shared.repositories.mongodb_article_repository import get_content_repository
+from src.shared.health import start_health_server_background
 from src.shared.inference.provider_config_builder import build_provider_config
 
 logger = Logger()
 tracer = Tracer()
-
-SERVICE_PORT_KEY = "services.content_processor.port"
-DEFAULT_PORT = 8003
 
 
 def create_content_processor_orchestrator() -> ContentProcessorOrchestrator:
@@ -37,12 +33,11 @@ async def main():
     handler = ThreadPoolMessageDispatcher(orchestrator)
     consumer = get_message_consumer(handler, service_name="content_processor")
 
-    port = get_service_port(SERVICE_PORT_KEY, default=DEFAULT_PORT)
+    port = int(get_config_service().get("services.content_processor.port"))
     logger.info(f"Starting health server on port {port}")
     health_task = start_health_server_background(
         service_name="Content Processor Service",
-        appconfig_key=SERVICE_PORT_KEY,
-        default_port=DEFAULT_PORT
+        port=port
     )
 
     loop = asyncio.get_running_loop()
