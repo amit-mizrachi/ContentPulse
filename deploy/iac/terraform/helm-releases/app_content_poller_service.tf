@@ -28,9 +28,11 @@ resource "helm_release" "content_poller_service_release" {
       }
 
       service = {
+        name          = var.service_names.content_poller
         type          = "ClusterIP"
         containerPort = var.service_ports.content_poller
         port          = var.service_ports.content_poller
+        portKey       = "PORT_CONTENT_POLLER"
       }
 
       resources = {

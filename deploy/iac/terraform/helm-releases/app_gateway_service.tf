@@ -28,9 +28,11 @@ resource "helm_release" "gateway_service_release" {
       }
 
       service = {
+        name          = var.service_names.gateway
         type          = "ClusterIP"
         containerPort = var.service_ports.gateway
         port          = var.service_ports.gateway
+        portKey       = "PORT_GATEWAY"
       }
 
       resources = {
@@ -49,6 +51,27 @@ resource "helm_release" "gateway_service_release" {
         minReplicas                    = var.autoscaling.services.gateway.min_replicas
         maxReplicas                    = var.autoscaling.services.gateway.max_replicas
         targetCPUUtilizationPercentage = var.autoscaling.cpu_target_percent
+      }
+
+      ingress = {
+        enabled   = true
+        className = "alb"
+        annotations = {
+          "alb.ingress.kubernetes.io/scheme"           = "internet-facing"
+          "alb.ingress.kubernetes.io/target-type"      = "ip"
+          "alb.ingress.kubernetes.io/healthcheck-path" = "/health"
+          "alb.ingress.kubernetes.io/listen-ports"     = "[{\"HTTP\": 80}]"
+          "alb.ingress.kubernetes.io/group.name"       = "contentpulse"
+        }
+        hosts = [
+          {
+            host = ""
+            paths = [
+              { path = "/", pathType = "Prefix" }
+            ]
+          }
+        ]
+        tls = []
       }
 
       env = [

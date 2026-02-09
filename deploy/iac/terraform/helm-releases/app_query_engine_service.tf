@@ -30,9 +30,11 @@ resource "helm_release" "query_engine_service_release" {
       }
 
       service = {
+        name          = var.service_names.query_engine
         type          = "ClusterIP"
         containerPort = var.service_ports.query_engine
         port          = var.service_ports.query_engine
+        portKey       = "PORT_QUERY_ENGINE"
       }
 
       resources = {

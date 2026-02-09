@@ -34,9 +34,11 @@ resource "helm_release" "content_processor_service_release" {
       }
 
       service = {
+        name          = var.service_names.content_processor
         type          = "ClusterIP"
         containerPort = var.service_ports.content_processor
         port          = var.service_ports.content_processor
+        portKey       = "PORT_CONTENT_PROCESSOR"
       }
 
       resources = local.content_processor_gpu_mode ? {
