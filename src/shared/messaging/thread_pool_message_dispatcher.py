@@ -1,5 +1,5 @@
-from src.shared.interfaces.message_handler import MessageHandler
-from src.shared.interfaces.message_dispatcher import MessageDispatcher
+from src.shared.interfaces.messaging.message_handler import MessageHandler
+from src.shared.interfaces.messaging.message_dispatcher import MessageDispatcher
 from src.shared.aws.appconfig_service import get_config_service
 from src.shared.observability.logs.logger import Logger
 from src.shared.messaging.context_preserving_thread_pool import ContextPreservingThreadPool

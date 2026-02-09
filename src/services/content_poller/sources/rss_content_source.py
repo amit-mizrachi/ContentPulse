@@ -9,9 +9,7 @@ from src.shared.interfaces.content_source import ContentSource
 from src.shared.objects.content.raw_article import RawArticle
 
 
-class RSSSource(ContentSource):
-    """Generic RSS feed parser for sports content sources."""
-
+class RSSContentSource(ContentSource):
     def __init__(self, source_name: str, feed_urls: List[str]):
         self._source_name = source_name
         self._feed_urls = feed_urls

@@ -9,7 +9,7 @@ from src.shared.aws.sqs_service import get_sqs_service
 from src.shared.observability.logs.logger import Logger
 from src.shared.observability.traces.spans.span_context_factory import SpanContextFactory
 from src.shared.observability.traces.spans.spanner import Spanner
-from src.shared.interfaces.message_dispatcher import MessageDispatcher
+from src.shared.interfaces.messaging.message_dispatcher import MessageDispatcher
 from src.shared.messaging.sqs.sqs_visibility_extender import SQSVisibilityExtender
 
 

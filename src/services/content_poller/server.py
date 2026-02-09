@@ -4,8 +4,8 @@ import signal
 
 from src.services.content_poller.dedup_cache import DeduplicationCache
 from src.services.content_poller.poller import ContentPoller
-from src.services.content_poller.sources.reddit_source import RedditSource
-from src.services.content_poller.sources.rss_source import RSSSource
+from src.services.content_poller.sources.reddit_content_source import RedditContentSource
+from src.services.content_poller.sources.rss_content_source import RSSContentSource
 from src.shared.observability.logs.logger import Logger
 from src.shared.observability.traces.tracer import Tracer
 from src.shared.messaging.messaging_factory import get_message_publisher
@@ -34,7 +34,7 @@ def create_content_poller() -> ContentPoller:
         subreddits = [s.strip() for s in subreddits_raw.split(",")]
 
         if reddit_client_id and reddit_client_secret:
-            sources.append(RedditSource(
+            sources.append(RedditContentSource(
                 client_id=reddit_client_id,
                 client_secret=reddit_client_secret,
                 user_agent=reddit_user_agent,
@@ -51,7 +51,7 @@ def create_content_poller() -> ContentPoller:
     for source_name, feeds in rss_feeds.items():
         valid_feeds = [f.strip() for f in feeds if f.strip()]
         if valid_feeds:
-            sources.append(RSSSource(source_name=source_name, feed_urls=valid_feeds))
+            sources.append(RSSContentSource(source_name=source_name, feed_urls=valid_feeds))
 
     content_topic = config.get("topics.content_raw", "content-raw")
     poll_interval = int(config.get("poller.interval_seconds", 300))

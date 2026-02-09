@@ -4,21 +4,15 @@ import json
 
 from confluent_kafka import Consumer, KafkaError
 
-from src.shared.interfaces.message_consumer import AsyncMessageConsumer
+from src.shared.interfaces.messaging.message_consumer import AsyncMessageConsumer
 from src.shared.observability.logs.logger import Logger
-from src.shared.interfaces.message_dispatcher import MessageDispatcher
+from src.shared.interfaces.messaging.message_dispatcher import MessageDispatcher
 from src.shared.observability.traces.spans.span_context_factory import SpanContextFactory
 from src.shared.observability.traces.spans.spanner import Spanner
 from src.shared.aws.appconfig_service import get_config_service
 
 
 class KafkaConsumer(AsyncMessageConsumer):
-    """Async wrapper around confluent-kafka's blocking Consumer.
-
-    Uses loop.run_in_executor() to poll without blocking the event loop,
-    matching the pattern used by SQSConsumer.
-    """
-
     def __init__(self, message_handler: MessageDispatcher, topic_config_key: str):
         self._appconfig = get_config_service()
         self._logger = Logger()

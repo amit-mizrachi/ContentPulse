@@ -8,9 +8,7 @@ from src.shared.interfaces.content_source import ContentSource
 from src.shared.objects.content.raw_article import RawArticle
 
 
-class RedditSource(ContentSource):
-    """Polls configured subreddits for sports content."""
-
+class RedditContentSource(ContentSource):
     def __init__(
         self,
         client_id: str,

@@ -1,11 +1,11 @@
 """Inference Provider Config interface."""
 from abc import ABC, abstractmethod
 
-from src.shared.interfaces.llm_provider import LLMProvider
+from src.shared.interfaces.inference.inference_provider import InferenceProvider
 from src.shared.objects.enums.inference_mode import InferenceMode
 
 
-class LLMProviderConfig(ABC):
+class InferenceProviderConfig(ABC):
     @property
     @abstractmethod
     def provider_name(self) -> str:
@@ -27,5 +27,5 @@ class LLMProviderConfig(ABC):
         pass
 
     @abstractmethod
-    def create_provider(self) -> LLMProvider:
+    def create_provider(self) -> InferenceProvider:
         pass

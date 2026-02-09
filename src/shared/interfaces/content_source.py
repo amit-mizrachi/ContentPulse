@@ -7,8 +7,6 @@ from src.shared.objects.content.raw_article import RawArticle
 
 
 class ContentSource(ABC):
-    """Interface for content sources that provide sports articles."""
-
     @abstractmethod
     def fetch_latest(self, since: Optional[datetime] = None) -> List[RawArticle]:
         pass

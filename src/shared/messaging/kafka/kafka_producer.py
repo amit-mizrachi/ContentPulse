@@ -1,20 +1,15 @@
 """Kafka message publisher using confluent-kafka."""
 from functools import lru_cache
 
-from confluent_kafka import Producer, KafkaError
+from confluent_kafka import Producer
 
-from src.shared.interfaces.message_publisher import MessagePublisher
+from src.shared.interfaces.messaging.message_publisher import MessagePublisher
 from src.shared.observability.logs.logger import Logger
 from src.shared.observability.traces.spans.span_context_factory import SpanContextFactory
 from src.shared.aws.appconfig_service import get_config_service
 
 
 class KafkaPublisher(MessagePublisher):
-    """Synchronous Kafka publisher backed by confluent-kafka (librdkafka).
-
-    Thread-safe — safe to call from ContextPreservingExecutor threads.
-    """
-
     def __init__(self):
         self._appconfig = get_config_service()
         self._logger = Logger()
@@ -47,5 +42,4 @@ class KafkaPublisher(MessagePublisher):
 
 @lru_cache(maxsize=1)
 def get_kafka_publisher() -> KafkaPublisher:
-    """Get the singleton KafkaPublisher instance."""
     return KafkaPublisher()

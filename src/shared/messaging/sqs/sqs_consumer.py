@@ -1,8 +1,8 @@
 import asyncio
 
-from src.shared.interfaces.message_consumer import AsyncMessageConsumer
+from src.shared.interfaces.messaging.message_consumer import AsyncMessageConsumer
 from src.shared.observability.logs.logger import Logger
-from src.shared.interfaces.message_dispatcher import MessageDispatcher
+from src.shared.interfaces.messaging.message_dispatcher import MessageDispatcher
 from src.shared.messaging.sqs.sqs_message_processor import SQSMessageProcessor
 from src.shared.messaging.sqs.sqs_poller import SQSPoller
 from src.shared.messaging.sqs.sqs_visibility_extender import SQSVisibilityExtender

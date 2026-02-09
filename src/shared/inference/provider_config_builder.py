@@ -1,5 +1,5 @@
 """Provider config builder - maps config strings to provider configs."""
-from src.shared.interfaces.inference_provider_config import InferenceProviderConfig
+from src.shared.interfaces.inference.inference_provider_config import InferenceProviderConfig
 from src.shared.inference.provider_configs.google_provider_config import GoogleProviderConfig
 from src.shared.inference.provider_configs.openai_provider_config import OpenAIProviderConfig
 from src.shared.inference.provider_configs.ollama_provider_config import OllamaProviderConfig

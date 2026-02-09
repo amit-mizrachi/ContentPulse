@@ -1,13 +1,13 @@
 """Inference result value object."""
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
 class InferenceResult:
-    """Result from LLM inference."""
     response: str
     model: str
     prompt_tokens: int
-    completion_tokens: int
-    total_tokens: int
-    latency_ms: float
+    completion_tokens: Optional[int] = None
+    total_tokens: Optional[int] = None
+    latency_ms: Optional[float] = None

@@ -3,7 +3,7 @@ from functools import lru_cache
 
 import boto3
 
-from src.shared.interfaces.message_publisher import MessagePublisher
+from src.shared.interfaces.messaging.message_publisher import MessagePublisher
 from src.shared.observability.logs.logger import Logger
 from src.shared.observability.traces.spans.span_context_factory import SpanContextFactory
 from src.shared.aws.appconfig_service import get_config_service
